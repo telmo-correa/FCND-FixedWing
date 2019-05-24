@@ -92,7 +92,7 @@ The Unity / manual tuning of parameters seems to not work at all for this scenar
 
 These parameters are *negative*, unlike all of the gains seen so far -- the commanded pitch here is expected to be negative when climbing.
 
-![Climb Scenario Success](images/scenario4-succcess.PNG)
+![Climb Scenario Success](images/scenario4-success.PNG)
 
 
 #### Scenario 5: Longitudinal Challenge
