@@ -19,14 +19,21 @@ class LongitudinalAutoPilot(object):
         self.kp_pitch = 4.0
         self.kp_q = 0.5
 
-        # Gain parameters for altitude_loop PID controller
+        # Gain parameters for altitude_loop PI controller
         self.kp_alt = 0.03
         self.ki_alt = 0.02
-        
+
+        # Gain parameters for airspeed_loop PI controller
+        self.kp_speed = 0.3
+        self.ki_speed = 0.3
+
+        # Feed-forward term for throttle
+        self.throttle_feedforward = 0.658
+
         return
-    
-    
-    
+
+
+
     """Used to calculate the elevator command required to achieve the target
     pitch
     
@@ -84,10 +91,10 @@ class LongitudinalAutoPilot(object):
 
         # Integrator anti-windup
         if self.ki_alt != 0 and pitch_cmd != pitch_cmd_unbound:
-            self.alt_int = self.alt_int + dt / self.ki_alt * (pitch_cmd - pitch_cmd_unbound)
+            self.alt_int += dt / self.ki_alt * (pitch_cmd - pitch_cmd_unbound)
 
         return pitch_cmd
-    
+
 
     """Used to calculate the throttle command required command the target 
     airspeed
@@ -100,12 +107,30 @@ class LongitudinalAutoPilot(object):
         Returns:
             throttle_command: in percent throttle [0,1]
     """
-    def airspeed_loop(self, airspeed, airspeed_cmd, dt):        
-        throttle_cmd = 0.0
-        # STUDENT CODE HERE
-        
-        
+    def airspeed_loop(self, airspeed, airspeed_cmd, dt):
+        # Airspeed loop should be implemented as a PI controller with feed-forward
+
+        airspeed_error = airspeed_cmd - airspeed
+        self.speed_int += airspeed_error * dt
+
+        throttle_cmd_unbound = self.kp_speed * airspeed_error \
+                               + self.ki_speed * self.speed_int \
+                               + self.throttle_feedforward
+
+        if throttle_cmd_unbound > self.max_throttle:
+            throttle_cmd = self.max_throttle
+        elif throttle_cmd_unbound < self.min_throttle:
+            throttle_cmd = self.min_throttle
+        else:
+            throttle_cmd = throttle_cmd_unbound
+
+        # Integrator anti-windup
+        if self.ki_speed != 0 and throttle_cmd != throttle_cmd_unbound:
+            self.speed_int += dt / self.ki_speed * (throttle_cmd - throttle_cmd_unbound)
+
         return throttle_cmd
+
+
     """Used to calculate the pitch command required to maintain the commanded
     airspeed
     
@@ -120,10 +145,10 @@ class LongitudinalAutoPilot(object):
     def airspeed_pitch_loop(self, airspeed, airspeed_cmd, dt):
         pitch_cmd = 0.0
         # STUDENT CODE HERE
-        
-        
+
+
         return pitch_cmd
-    
+
     """Used to calculate the pitch command and throttle command based on the
     aicraft altitude error
     
@@ -143,17 +168,17 @@ class LongitudinalAutoPilot(object):
         pitch_cmd = 0.0
         throttle_cmd = 0.0
         # STUDENT CODE HERE
-        
-        
+
+
         return[pitch_cmd, throttle_cmd]
 
 
- 
+
 class LateralAutoPilot:
-    
+
     def __init__(self):
         self.g = 9.81
-        self.integrator_yaw = 0.0 
+        self.integrator_yaw = 0.0
         self.integrator_beta = 0.0
         self.gate = 1
         self.max_roll = 60*np.pi/180.0
@@ -174,14 +199,14 @@ class LateralAutoPilot:
     """
     def roll_attitude_hold_loop(self,
                                 phi_cmd,  # commanded roll
-                                phi,    # actual roll 
-                                roll_rate, 
+                                phi,    # actual roll
+                                roll_rate,
                                 T_s = 0.0):
         aileron = 0
         # STUDENT CODE HERE
-        
-        
-        
+
+
+
         return aileron
 
     """Used to calculate the commanded roll angle from the course/yaw angle
@@ -197,14 +222,14 @@ class LateralAutoPilot:
     """
     def yaw_hold_loop(self,
                          yaw_cmd,  # desired heading
-                         yaw,     # actual heading 
+                         yaw,     # actual heading
                          T_s,
                          roll_ff=0):
         roll_cmd = 0
-        
+
         # STUDENT CODE HERE
-        
-        
+
+
         return roll_cmd
 
 
@@ -218,14 +243,14 @@ class LateralAutoPilot:
             rudder: in percent full rudder [-1,1]
     """
     def sideslip_hold_loop(self,
-                           beta, # sideslip angle 
+                           beta, # sideslip angle
                            T_s):
         rudder = 0
         # STUDENT CODE HERE
-        
-        
+
+
         return rudder
-    
+
     """Used to calculate the desired course angle based on cross-track error
     from a desired line
     
@@ -237,14 +262,14 @@ class LateralAutoPilot:
         Returns:
             course_cmd: course/yaw cmd for the vehicle in radians
     """
-    def straight_line_guidance(self, line_origin, line_course, 
+    def straight_line_guidance(self, line_origin, line_course,
                                local_position):
         course_cmd = 0
         # STUDENT CODE HERE
-        
-        
+
+
         return course_cmd
-    
+
     """Used to calculate the desired course angle based on radius error from
     a specified orbit center
     
@@ -262,8 +287,8 @@ class LateralAutoPilot:
                        clockwise = True):
         course_cmd = 0
         # STUDENT CODE HERE
-        
-        
+
+
         return course_cmd
 
     """Used to calculate the feedforward roll angle for a constant radius
@@ -278,11 +303,11 @@ class LateralAutoPilot:
             roll_ff: feed-forward roll in radians
     """
     def coordinated_turn_ff(self, speed, radius, cw):
-        
+
         roll_ff = 0
         # STUDENT CODE HERE
-        
-        
+
+
         return roll_ff
 
     """Used to calculate the desired course angle and feed-forward roll
@@ -299,15 +324,15 @@ class LateralAutoPilot:
             yaw_cmd: commanded yaw/course in radians
     """
     def path_manager(self, local_position, yaw, airspeed_cmd):
-        
+
         roll_ff = 0
         yaw_cmd = 0
         # STUDENT CODE HERE
-        
-        
+
+
         return(roll_ff,yaw_cmd)
-    
-    
+
+
     """Used to calculate the desired course angle and feed-forward roll
     depending on which phase of lateral flight (orbit or line following) the 
     aicraft is in
@@ -327,11 +352,11 @@ class LateralAutoPilot:
         roll_ff = 0.0
         yaw_cmd = 0.0
         cycle = False
-        
+
         # STUDENT CODE HERE
-        
-        
-        
+
+
+
         return(roll_ff, yaw_cmd, cycle)
 
 
@@ -340,23 +365,23 @@ def euler2RM(roll,pitch,yaw):
     R = np.array([[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]])
     cr = np.cos(roll)
     sr = np.sin(roll)
-    
+
     cp = np.cos(pitch)
     sp = np.sin(pitch)
-    
+
     cy = np.cos(yaw)
     sy = np.sin(yaw)
-    
+
     R[0,0] = cp*cy
     R[1,0] = -cr*sy+sr*sp*cy
     R[2,0] = sr*sy+cr*sp*cy
-    
+
     R[0,1] = cp*sy
     R[1,1] = cr*cy+sr*sp*sy
     R[2,1] = -sr*cy+cr*sp*sy
-    
+
     R[0,2] = -sp
     R[1,2] = sr*cp
     R[2,2] = cr*cp
-    
+
     return R.transpose()

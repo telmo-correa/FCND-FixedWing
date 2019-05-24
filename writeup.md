@@ -55,6 +55,27 @@ I implemented equivalent logic, for ease of tuning in future scenarios.
 
 #### Scenario 3: Airspeed Hold
 
+This scenario requires implementing a PI controller for the airspeed hold.  
+
+![Airspeed Hold Scenario Intro](images/scenario3-intro.PNG)
+
+The code implementation is *almost* analogous to the implementation for the PI controller on the altitude loop -- we include a feed-forward term based on the throttle obtained for scenario 1.
+
+Initial tuning provides the following gain values:
+
+```
+    # Gain parameters for airspeed_loop PI controller
+    self.kp_speed = 0.4
+    self.ki_speed = 0.3
+
+    # Feed-forward term for throttle
+    self.throttle_feedforward = 0.658
+```
+
+This works! ... after making sure that the code was running on a sufficiently fast computer, with the relevant graphic options set.
+
+![Airspeed Hold Scenario Success](images/scenario3-success.PNG)
+
 #### Scenario 4: Steady Climb
 
 #### Scenario 5: Longitudinal Challenge
