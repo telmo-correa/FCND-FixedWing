@@ -121,8 +121,8 @@ class LongitudinalAutoPilot(object):
         self.speed_int += airspeed_error * dt
 
         throttle_cmd_unbound = self.kp_speed * airspeed_error \
-                               + self.ki_speed * self.speed_int \
-                               + self.throttle_feedforward
+            + self.ki_speed * self.speed_int \
+            + self.throttle_feedforward
 
         if throttle_cmd_unbound > self.max_throttle:
             throttle_cmd = self.max_throttle
@@ -221,12 +221,28 @@ class LateralAutoPilot:
         self.kp_sideslip = -2.0
         self.ki_sideslip = -1.0
 
-        # Helper parameters for sideslip PI integrator
+        # Helper parameters for sideslip_hold_loop PI integrator
         self.integrator_beta = 0.0
         self.beta_error_last = 0.0
 
+        # Gain parameters for the yaw_hold_loop PI controller
+        self.kp_yaw = 2.1
+        self.ki_yaw = 0.4
+
         return
 
+
+    """Used to limit angles to values between -pi and pi
+    
+       Args:
+           theta: angle to limit between -pi and pi
+           
+       Returns:
+           value between -pi and pi
+    """
+    @staticmethod
+    def fmod(theta):
+        return theta if abs(theta) < np.pi else (theta + np.pi) % (2 * np.pi) - np.pi
 
     """Used to calculate the commanded aileron based on the roll error
     
@@ -258,8 +274,8 @@ class LateralAutoPilot:
         Args:
             yaw_cmd: commanded yaw in radians
             yaw: roll angle in radians
-            roll_rate: in radians/sec
             T_s: timestep in sec
+            roll_ff: in radians/sec
             
         Returns:
             roll_cmd: commanded roll in radians
@@ -269,10 +285,26 @@ class LateralAutoPilot:
                          yaw,     # actual heading
                          T_s,
                          roll_ff=0):
-        roll_cmd = 0
+        # Implemented as a PI controller with feed-forward value.
 
-        # STUDENT CODE HERE
+        yaw_error = LateralAutoPilot.fmod(yaw_cmd - yaw)
+        self.integrator_yaw += yaw_error * T_s
 
+        roll_cmd_unbound = self.kp_yaw * yaw_error \
+            + self.ki_yaw * self.integrator_yaw \
+            + roll_ff
+        roll_cmd_unbound = LateralAutoPilot.fmod(roll_cmd_unbound)
+
+        if roll_cmd_unbound > self.max_roll:
+            roll_cmd = self.max_roll
+        elif roll_cmd_unbound < -self.max_roll:
+            roll_cmd = -self.max_roll
+        else:
+            roll_cmd = roll_cmd_unbound
+
+        # Integrator anti-windup
+        if self.ki_yaw != 0 and roll_cmd != roll_cmd_unbound:
+            self.integrator_yaw += T_s / self.ki_yaw * LateralAutoPilot.fmod(roll_cmd - roll_cmd_unbound)
 
         return roll_cmd
 

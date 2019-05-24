@@ -208,6 +208,42 @@ As suggested on the scenario, however, there is occasional instability, potentia
 
 ### Scenario #8: Constant Course/Yaw Hold
 
+![Constant Course/Yaw Hold Scenario Intro](images/scenario/scenario8_intro.png)
+
+This scenario calls for a PI controller for the yaw.
+
+![Constant Course/Yaw Hold Diagram](Diagrams/course_hold.PNG)
+
+![Course Control Loop](images/control_loop/course.png)
+
+Note: The documentation for the `yaw_hold_loop` method initially referred to parameter roll_rate, which does not exist, and does not include documentation for the feed forward parameter, which does exist.  The documentation has been updated on the solution.
+
+Extra care being taken to keep the yaw within the -pi to pi range -- all angles (but not angular velocities) are converted to values between -pi and pi on this implementation, with the help of the function defined below as a static method in `LateralAutoPilot`. 
+
+```
+    """Used to limit angles to values between -pi and pi
+    
+       Args:
+           theta: angle to limit between -pi and pi
+           
+       Returns:
+           value between -pi and pi
+    """
+    @staticmethod
+    def fmod(theta):
+        return theta if abs(theta) < np.pi else (theta + np.pi) % (2 * np.pi) - np.pi
+```
+
+Tuning using Unity also failed to work for this scenario -- the behavior seems unresponsive to the UI parameters.  Tuning was instead performed using my own implementation.
+
+```
+    # Gain parameters for the yaw_hold_loop PI controller
+    self.kp_yaw = 2.1
+    self.ki_yaw = 0.4
+```
+
+![Constant Course/Yaw Hold Scenario Success](images/scenario/scenario8_success.png)
+
 ### Scenario #9: Straight Line Following
 
 ### Scenario #10: Orbit Following
