@@ -122,6 +122,21 @@ Testing produced catastrophic crashes at threshold of 50m, the plane was not abl
 
 #### Scenario 6: Stabilized Roll Angle
 
+![Stabilized Roll Angle Scenario Intro](images/scenario6-intro.PNG)
+
+One more PD controller; the intended roll speed is always 0.
+
+Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; however, these are tuned against the default implementation, which is about twice as tight with its gains compared to the values I am tuning.  Accordingly, once I attempt to run with my own implementation, I find satisfactory values that are about half of that:
+
+```
+    # Gain parameters for roll_attitude_hold_loop PD controller
+    self.kp_roll = 5.0
+    self.kd_roll = 0.5
+```
+
+![Stabilized Roll Angle Scenario Success](images/scenario6-success.PNG)
+
+
 #### Scenario 7: Coordinated Turn
 
 #### Scenario 8: Constant Course/Yaw Hold

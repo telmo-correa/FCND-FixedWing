@@ -41,7 +41,6 @@ class LongitudinalAutoPilot(object):
         return
 
 
-
     """Used to calculate the elevator command required to achieve the target
     pitch
     
@@ -211,9 +210,14 @@ class LateralAutoPilot:
         self.integrator_yaw = 0.0
         self.integrator_beta = 0.0
         self.gate = 1
-        self.max_roll = 60*np.pi/180.0
+        self.max_roll = 60 * np.pi / 180.0
         self.state = 1
 
+        # Gain parameters for roll_attitude_hold_loop PD controller
+        self.kp_roll = 5.0
+        self.kd_roll = 0.5
+
+        return
 
 
     """Used to calculate the commanded aileron based on the roll error
@@ -232,12 +236,13 @@ class LateralAutoPilot:
                                 phi,    # actual roll
                                 roll_rate,
                                 T_s = 0.0):
-        aileron = 0
-        # STUDENT CODE HERE
+        # Implemented as a PD controller.  Explicitly not adding an integral term, no use for Ts
 
-
+        phi_error = phi_cmd - phi
+        aileron = self.kp_roll * phi_error + self.kd_roll * roll_rate
 
         return aileron
+
 
     """Used to calculate the commanded roll angle from the course/yaw angle
     
