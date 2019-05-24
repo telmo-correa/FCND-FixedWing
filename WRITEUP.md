@@ -246,6 +246,39 @@ Tuning using Unity also failed to work for this scenario -- the behavior seems u
 
 ### Scenario #9: Straight Line Following
 
+![Straight Line Following Scenario Intro](images/scenario/scenario9_intro.png)
+
+This scenario asks us to implement `straight_line_guidance`.
+
+* Given the plane's position and target position on the line, we can compute the current orientation
+* Given the line heading, we can compute the angle between it and the plane orientation, which should be controlled down to zero.
+
+```
+    def straight_line_guidance(self, line_origin, line_course,
+                               local_position):
+        # Compute the N, E orientation components on the inertial frame
+        orientation_n = line_origin[0] - local_position[0]
+        orientation_e = line_origin[1] - local_position[1]
+
+        # Compute the orientation angle and error on the inertial frame
+        orientation_angle = np.arctan2(orientation_e, orientation_n)
+        orientation_error = line_course - orientation_angle
+
+        # Control the error to zero
+        course_cmd = self.kp_course * orientation_error
+
+        return course_cmd
+```
+
+The initial guess for a tuning parameter worked well enough, once I adjusted its sign:
+
+```
+    # Gain parameters for the straight_line_guidance P controller
+    self.kp_course = -0.01
+```
+
+![Straight Line Following Scenario Success](images/scenario/scenario9_success.png)
+
 ### Scenario #10: Orbit Following
 
 ### Scenario #11: Lateral/Directional Challenge

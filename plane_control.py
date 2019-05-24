@@ -229,6 +229,9 @@ class LateralAutoPilot:
         self.kp_yaw = 2.1
         self.ki_yaw = 0.4
 
+        # Gain parameters for the straight_line_guidance P controller
+        self.kp_course = -0.01
+
         return
 
 
@@ -357,9 +360,16 @@ class LateralAutoPilot:
     """
     def straight_line_guidance(self, line_origin, line_course,
                                local_position):
-        course_cmd = 0
-        # STUDENT CODE HERE
+        # Compute the N, E orientation components on the inertial frame
+        orientation_n = line_origin[0] - local_position[0]
+        orientation_e = line_origin[1] - local_position[1]
 
+        # Compute the orientation angle and error on the inertial frame
+        orientation_angle = np.arctan2(orientation_e, orientation_n)
+        orientation_error = line_course - orientation_angle
+
+        # Control the error to zero
+        course_cmd = self.kp_course * orientation_error
 
         return course_cmd
 
