@@ -12,22 +12,27 @@
 
 ### Scenario 1: Trim (Unity Only)
 
-This scenario requires no coding or gains to tune -- just calibrating the values manually on the flight simulator.
+![Trim Scenario Intro](images/scenario/scenario1_intro.png)
 
-![Trim Scenario Intro](images/scenario1-intro.PNG)
+This scenario requires no coding or gains to tune -- just calibrating the values manually on the flight simulator.
 
 The fixed throttle at **65.8%** eventually leads to success:
 
-![Trim Scenario Success](images/scenario1-success.PNG)
+![Trim Scenario Success](images/scenario/scenario1_success.png)
 
 
 ### Scenario 2: Altitude Hold
 
+![Altitude Hold Scenario Intro](images/scenario/scenario2_intro.png)
+
+
 This scenario requires implementing the pitch hold and altitude hold controllers.  They are implemented as PD and PI controllers, respectively.
 
-![altitude](Diagrams/altitude_hold.png)
+![Altitude Diagram](Diagrams/altitude_hold.png)
 
-![Altitude Hold Scenario Intro](images/scenario2-intro.PNG)
+![Pitch Altitude Hold Control Loop](images/control_loop/pitch_altitude.png)
+
+![Altitude Hold Control Loop](images/control_loop/altitude.png)
 
 Tuning the process produces the following gains:
 
@@ -55,15 +60,17 @@ This implementation changes the integrated error to have been updated by a value
 
 I implemented equivalent logic, for ease of tuning in future scenarios.
 
-![Altitude Hold Scenario Success](images/scenario2-success.PNG)
+![Altitude Hold Scenario Success](images/scenario/scenario2_success.png)
 
 ### Scenario 3: Airspeed Hold
 
-This scenario requires implementing a PI controller for the airspeed hold.  
+![Airspeed Hold Scenario Intro](images/scenario/scenario3_intro.png)
 
-![airspeed_hold](Diagrams/airspeed_hold.png)
+This scenario requires implementing a PI controller for the airspeed hold based on throttle. 
 
-![Airspeed Hold Scenario Intro](images/scenario3-intro.PNG)
+![Airspeed_Hold Diagram](Diagrams/airspeed_hold.png)
+
+![Airspeed Hold Control Loop](images/control_loop/airspeed_throttle.png)
 
 The code implementation is *almost* analogous to the implementation for the PI controller on the altitude loop -- we include a feed-forward term based on the throttle obtained for scenario 1.
 
@@ -80,15 +87,17 @@ Initial tuning provides the following gain values:
 
 This works! ... after making sure that the code was running on a sufficiently fast computer, with the relevant graphic options set (i.e. disabling G-SYNC on my NVIDEA GTX card.)
 
-![Airspeed Hold Scenario Success](images/scenario3-success.PNG)
+![Airspeed Hold Scenario Success](images/scenario/scenario3_success.png)
 
 ### Scenario 4: Steady Climb
 
-This requires yet another PI controller -- this time, for the climb state.
+![Climb Scenario Intro](images/scenario/scenario4_intro.png)
 
-![climb](Diagrams/airspeed_pitch_hold.png)
+This requires yet another PI controller -- this time, for the climb state; controlling the airspeed hold based on pitch.
 
-![Climb Scenario Intro](images/scenario4-intro.PNG)
+![Airspeed Pitch Hold Diagram](Diagrams/airspeed_pitch_hold.png)
+
+![Airspeed Pitch Hold Control Loop](images/control_loop/airspeed_pitch.png)
 
 The Unity / manual tuning of parameters seems to not work at all for this scenario -- tuning had to be done by running the python script and changing its parameters there instead.
 
@@ -100,12 +109,12 @@ The Unity / manual tuning of parameters seems to not work at all for this scenar
 
 These parameters are *negative*, unlike all of the gains seen so far -- the commanded pitch here is expected to be negative when climbing.
 
-![Climb Scenario Success](images/scenario4-success.PNG)
+![Climb Scenario Success](images/scenario/scenario4_success.png)
 
 
 ### Scenario 5: Longitudinal Challenge
 
-![Longitudinal Challenge Scenario Intro](images/scenario5-intro.PNG)
+![Longitudinal Challenge Scenario Intro](images/scenario/scenario5_intro.png)
 
 This is relatively straightforward -- there are three potential states:
 
@@ -120,8 +129,7 @@ Testing produced catastrophic crashes at threshold of 50m, the plane was not abl
     self.altitude_switch = 20
 ```
 
-![Longitudinal Challenge Scenario Success](images/scenario5-success.PNG)
-
+![Longitudinal Challenge Scenario Success](images/scenario/scenario5_success.png)
 
 ---
 
@@ -130,11 +138,13 @@ Testing produced catastrophic crashes at threshold of 50m, the plane was not abl
 
 ### Scenario 6: Stabilized Roll Angle
 
+![Stabilized Roll Angle Scenario Intro](images/scenario/scenario6_intro.png)
+
 One more PD controller; the intended roll speed is always 0.
 
-![roll](Diagrams/roll_loop.png)
+![Stabilized Roll Angle Diagram](Diagrams/roll_loop.png)
 
-![Stabilized Roll Angle Scenario Intro](images/scenario6-intro.PNG)
+![Roll Altitude Roll Control Loop](images/control_loop/roll_altitude.png)
 
 Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; however, these are tuned against the default implementation, which is about twice as tight with its gains compared to the values I am tuning.  Accordingly, once I attempt to run with my own implementation, I find satisfactory values that are about half of that:
 
@@ -144,14 +154,16 @@ Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; howe
     self.kd_roll = 0.5
 ```
 
-![Stabilized Roll Angle Scenario Success](images/scenario6-success.PNG)
+![Stabilized Roll Angle Scenario Success](images/scenario/scenario6_success.png)
 
 
 ### Scenario 7: Coordinated Turn
 
-![turn](Diagrams/sideslip_hold.PNG)
+![Coordinated Turn Scenario Intro](images/scenario/scenario7_intro.png)
 
-![Coordinated Turn Scenario Intro](images/scenario7-intro.PNG)
+![Coordinated Turn Diagram](Diagrams/sideslip_hold.PNG)
+
+![Sideslip Control Loop](images/control_loop/sideslip.png)
 
 ### Scenario 8: Constant Course/Yaw Hold
 
