@@ -2,7 +2,9 @@
 
 ---
 
-[Staff-provided equations linked here](https://www.overleaf.com/read/cvqmtzyhqjnj)
+#### Fixed Wing Equations
+* The original cheatsheet with equations for this project is [available online](https://www.overleaf.com/read/cvqmtzyhqjnj).
+* A [rendered PDF](Fixed%20Wing%20Cheatsheet.pdf) has been included in this repository.
 
 ---
 
