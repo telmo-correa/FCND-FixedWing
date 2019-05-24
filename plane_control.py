@@ -232,6 +232,9 @@ class LateralAutoPilot:
         # Gain parameters for the straight_line_guidance P controller
         self.kp_course = -0.01
 
+        # Gain parameters for the orbit_guidance P controller
+        self.kp_orbit_guidance = 2.5
+
         return
 
 
@@ -388,11 +391,32 @@ class LateralAutoPilot:
     """
     def orbit_guidance(self, orbit_center, orbit_radius, local_position, yaw,
                        clockwise = True):
-        course_cmd = 0
-        # STUDENT CODE HERE
 
+        # Determine the vector from orbit center to plane location
+        center_to_location_n = local_position[0] - orbit_center[0]
+        center_to_location_e = local_position[1] - orbit_center[1]
+
+        # Get vector size and magnitude
+        center_to_location_distance = np.sqrt(center_to_location_n**2 + center_to_location_e**2)
+        center_to_location_orientation = np.arctan2(center_to_location_e, center_to_location_n)
+
+        # Compute the error between actual orbit and desired orbit
+        distance_error = center_to_location_distance - orbit_radius
+        # Express error as angle / function of orbit
+        angle_error = np.arctan(self.kp_orbit_guidance * distance_error / orbit_radius)
+
+        # Compute tangent route orientation as feedforward -- rotate to get tangent from vector from orbit center
+        if clockwise:
+            tangent_angle = center_to_location_orientation - np.pi / 2
+        else:
+            tangent_angle = center_to_location_orientation + np.pi / 2
+
+        # Combine feedforward and error and limit between -pi and pi
+        course_cmd = angle_error + tangent_angle
+        course_cmd = LateralAutoPilot.fmod(course_cmd)
 
         return course_cmd
+
 
     """Used to calculate the feedforward roll angle for a constant radius
     coordinated turn
@@ -406,12 +430,16 @@ class LateralAutoPilot:
             roll_ff: feed-forward roll in radians
     """
     def coordinated_turn_ff(self, speed, radius, cw):
+        # Compute roll from Coriolis force
 
-        roll_ff = 0
-        # STUDENT CODE HERE
+        roll_ff = np.sqrt(speed ** 2 / (self.g * radius))
 
+        # Flip sign if not clockwise
+        if not cw:
+            roll_ff = -roll_ff
 
         return roll_ff
+
 
     """Used to calculate the desired course angle and feed-forward roll
     depending on which phase of lateral flight (orbit or line following) the 

@@ -281,6 +281,51 @@ The initial guess for a tuning parameter worked well enough, once I adjusted its
 
 ### Scenario #10: Orbit Following
 
+![Orbit Following Scenario Intro](images/scenario/scenario10_intro.png)
+
+This scenario was somewhat non-intuitive -- I initially attempted to apply a controller directly to the angle values, with no success in making the system stable.
+
+Instead, I took a page from the official solution and applied the P controller to the distance between the desired orbit value and the actual distance between plane and orbit center, converted to an angle value via arctangent.
+
+This implementation is analogous to the official solution, but should be much simpler to read -- and requires its own tuning parameters, as it must fly with the previously tuned parameters for this solution (which do not match the official ones).
+
+```
+    def orbit_guidance(self, orbit_center, orbit_radius, local_position, yaw,
+                       clockwise = True):
+
+        # Determine the vector from orbit center to plane location
+        center_to_location_n = local_position[0] - orbit_center[0]
+        center_to_location_e = local_position[1] - orbit_center[1]
+
+        # Get vector size and magnitude
+        center_to_location_distance = np.sqrt(center_to_location_n**2 + center_to_location_e**2)
+        center_to_location_orientation = np.arctan2(center_to_location_e, center_to_location_n)
+
+        # Compute the error between actual orbit and desired orbit
+        distance_error = center_to_location_distance - orbit_radius
+        # Express error as angle / function of orbit
+        angle_error = np.arctan(self.kp_orbit_guidance * distance_error / orbit_radius)
+
+        # Compute tangent route orientation as feedforward -- rotate to get tangent from vector from orbit center
+        if clockwise:
+            tangent_angle = center_to_location_orientation - np.pi / 2
+        else:
+            tangent_angle = center_to_location_orientation + np.pi / 2
+
+        # Combine feedforward and error and limit between -pi and pi
+        course_cmd = angle_error + tangent_angle
+        course_cmd = LateralAutoPilot.fmod(course_cmd)
+
+        return course_cmd
+```
+
+```
+    # Gain parameters for the orbit_guidance P controller
+    self.kp_orbit_guidance = 2.5
+```
+
+![Orbit Following Scenario Success](images/scenario/scenario10_success.png)
+
 ### Scenario #11: Lateral/Directional Challenge
 
 ## Final Challenges
