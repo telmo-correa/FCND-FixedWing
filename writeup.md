@@ -72,11 +72,28 @@ Initial tuning provides the following gain values:
     self.throttle_feedforward = 0.658
 ```
 
-This works! ... after making sure that the code was running on a sufficiently fast computer, with the relevant graphic options set.
+This works! ... after making sure that the code was running on a sufficiently fast computer, with the relevant graphic options set (i.e. disabling G-SYNC on my NVIDEA GTX card.)
 
 ![Airspeed Hold Scenario Success](images/scenario3-success.PNG)
 
 #### Scenario 4: Steady Climb
+
+This requires yet another PI controller -- this time, for the climb state.
+
+![Climb Scenario Intro](images/scenario4-intro.PNG)
+
+The Unity / manual tuning of parameters seems to not work at all for this scenario -- tuning had to be done by running the python script and changing its parameters there instead.
+
+```
+    # Gain parameters for airspeed_pitch_loop PI controller
+    self.kp_speed_pitch = -0.2
+    self.ki_speed_pitch = -0.2
+```
+
+These parameters are *negative*, unlike all of the gains seen so far -- the commanded pitch here is expected to be negative when climbing.
+
+![Climb Scenario Success](images/scenario4-succcess.PNG)
+
 
 #### Scenario 5: Longitudinal Challenge
 

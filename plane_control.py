@@ -10,6 +10,7 @@ class LongitudinalAutoPilot(object):
 
         self.min_pitch_cmd = -10.0 * np.pi / 180.0
         self.max_pitch_cmd = 30.0 * np.pi / 180.0
+        self.max_pitch_cmd_climb = 45 * np.pi / 180.0
 
         self.speed_int = 0.0
         self.alt_int = 0.0
@@ -29,6 +30,10 @@ class LongitudinalAutoPilot(object):
 
         # Feed-forward term for throttle
         self.throttle_feedforward = 0.658
+
+        # Gain parameters for airspeed_pitch_loop PI controller
+        self.kp_speed_pitch = -0.2
+        self.ki_speed_pitch = -0.2
 
         return
 
@@ -143,11 +148,24 @@ class LongitudinalAutoPilot(object):
             pitch_cmd: in radians
     """
     def airspeed_pitch_loop(self, airspeed, airspeed_cmd, dt):
-        pitch_cmd = 0.0
-        # STUDENT CODE HERE
+        # Airspeed pitch loop should be implemented as a PI controller
 
+        airspeed_error = airspeed_cmd - airspeed
+        self.climb_speed_int += airspeed_error * dt
+
+        pitch_cmd_unbound = self.kp_speed_pitch * airspeed_error + self.ki_speed_pitch * self.climb_speed_int
+
+        if pitch_cmd_unbound > self.max_pitch_cmd_climb:
+            pitch_cmd = self.max_pitch_cmd_climb
+        else:
+            pitch_cmd = pitch_cmd_unbound
+
+        # Integrator anti-windup
+        if self.ki_speed_pitch != 0 and pitch_cmd != pitch_cmd_unbound:
+            self.climb_speed_int += dt / self.ki_speed_pitch * (pitch_cmd - pitch_cmd_unbound)
 
         return pitch_cmd
+
 
     """Used to calculate the pitch command and throttle command based on the
     aicraft altitude error
