@@ -6,9 +6,9 @@
 
 ---
 
-#### Longitudinal Scenarios
+### Longitudinal Scenarios
 
-##### Scenario 1: Trim (Unity Only)
+#### Scenario 1: Trim (Unity Only)
 
 This scenario requires no coding or gains to tune -- just calibrating the values manually on the flight simulator.
 
@@ -19,7 +19,7 @@ The fixed throttle at **65.8%** eventually leads to success:
 ![Trim Scenario Success](images/scenario1-success.PNG)
 
 
-##### Scenario 2: Altitude Hold
+#### Scenario 2: Altitude Hold
 
 This scenario requires implementing the pitch hold and altitude hold controllers.  They are implemented as PD and PI controllers, respectively.
 
@@ -53,31 +53,31 @@ I implemented equivalent logic, for ease of tuning in future scenarios.
 
 ![Altitude Hold Scenario Success](images/scenario2-success.PNG)
 
-##### Scenario 3: Airspeed Hold
+#### Scenario 3: Airspeed Hold
 
-##### Scenario 4: Steady Climb
+#### Scenario 4: Steady Climb
 
-##### Scenario 5: Longitudinal Challenge
+#### Scenario 5: Longitudinal Challenge
 
 ---
 
-#### Lateral / Directional Scenarios
+### Lateral / Directional Scenarios
 
 
-##### Scenario 6: Stabilized Roll Angle
+#### Scenario 6: Stabilized Roll Angle
 
-##### Scenario 7: Coordinated Turn
+#### Scenario 7: Coordinated Turn
 
-##### Scenario 8: Constant Course/Yaw Hold
+#### Scenario 8: Constant Course/Yaw Hold
 
-##### Scenario 9: Straight Line Following
+#### Scenario 9: Straight Line Following
 
-##### Scenario 10: Orbit Following
+#### Scenario 10: Orbit Following
 
-##### Scenario 11: Lateral/Directional Challenge
+#### Scenario 11: Lateral/Directional Challenge
 
-#### Final Challenges
+### Final Challenges
 
-##### Scenario 12: Full 3D Challenge
+#### Scenario 12: Full 3D Challenge
 
-##### Scenario 13: Flying Car Challenge
+#### Scenario 13: Flying Car Challenge

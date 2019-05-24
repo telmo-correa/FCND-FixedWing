@@ -2,11 +2,9 @@
 
 This repository is an implementation of the [Udacity Flying Car Nanodegree Fixed Wing Project](https://github.com/udacity/FCND-FixedWing), an optional final project for the [Flying Car and Autonomous Flight Engineer Nanodegree](https://www.udacity.com/course/flying-car-nanodegree--nd787).
 
-- Setup and scenarios below are maintained from the original repository.
-- Scenario solution writeup is added as [writeup.md](writeup.md).
-- Scenario implementation added to `plane_control.py`.
+The repository has been cloned from the original one -- and kept the 'solution' branch with the official implementation.
 
-This repository has been cloned from the original repository above -- the staff provided solution is still present under the branch 'solution'.
+A full writeup of this solution is available at [writeup.md](writeup.md).
 
 Original README.md content follows.
 
