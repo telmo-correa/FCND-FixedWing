@@ -35,6 +35,9 @@ class LongitudinalAutoPilot(object):
         self.kp_speed_pitch = -0.2
         self.ki_speed_pitch = -0.2
 
+        # Threshold for switching behavior on altitude matching
+        self.altitude_switch = 20
+
         return
 
 
@@ -183,10 +186,19 @@ class LongitudinalAutoPilot(object):
     """
     def longitudinal_loop(self, airspeed, altitude, airspeed_cmd, altitude_cmd,
                           dt):
-        pitch_cmd = 0.0
-        throttle_cmd = 0.0
-        # STUDENT CODE HERE
 
+        if altitude < altitude_cmd - self.altitude_switch:
+            # Climb at max throttle
+            pitch_cmd = self.airspeed_pitch_loop(airspeed, airspeed_cmd, dt)
+            throttle_cmd = self.max_throttle
+            # Adjust pitch at min throttle
+        elif altitude > altitude_cmd + self.altitude_switch:
+            pitch_cmd = self.airspeed_pitch_loop(airspeed, airspeed_cmd, dt)
+            throttle_cmd = self.min_throttle
+        else:
+            # Use altitude controller
+            throttle_cmd = self.airspeed_loop(airspeed, airspeed_cmd, dt)
+            pitch_cmd = self.altitude_loop(altitude, altitude_cmd, dt)
 
         return[pitch_cmd, throttle_cmd]
 

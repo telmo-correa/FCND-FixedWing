@@ -97,6 +97,24 @@ These parameters are *negative*, unlike all of the gains seen so far -- the comm
 
 #### Scenario 5: Longitudinal Challenge
 
+![Longitudinal Challenge Scenario Intro](images/scenario5-intro.PNG)
+
+This is relatively straightforward -- there are three potential states:
+
+* If the altitude is too low, climb -- set throttle to max, and use airspeed_pitch_loop to control the pitch
+* If the altitude is too high, 'climb down' -- set throttle to min, and use airspeed_pitch_loop to control the pitch
+* Otherwise, control the throttle with airspeed_loop and the pitch with pitch_loop
+
+Testing produced catastrophic crashes at threshold of 50m, the plane was not able to stay within the 'good enough' band with a threshold of 10m, and a threshold of 20m proved sufficient:
+
+```
+    # Threshold for switching behavior on altitude matching
+    self.altitude_switch = 20
+```
+
+![Longitudinal Challenge Scenario Success](images/scenario5-success.PNG)
+
+
 ---
 
 ### Lateral / Directional Scenarios
