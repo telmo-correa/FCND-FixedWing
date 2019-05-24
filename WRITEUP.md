@@ -1,4 +1,4 @@
-## Optional Project: Fixed-Wing Control
+# Optional Project: Fixed-Wing Control
 
 ---
 
@@ -6,9 +6,9 @@
 
 ---
 
-### Longitudinal Scenarios
+## Longitudinal Scenarios
 
-#### Scenario 1: Trim (Unity Only)
+### Scenario 1: Trim (Unity Only)
 
 This scenario requires no coding or gains to tune -- just calibrating the values manually on the flight simulator.
 
@@ -19,7 +19,7 @@ The fixed throttle at **65.8%** eventually leads to success:
 ![Trim Scenario Success](images/scenario1-success.PNG)
 
 
-#### Scenario 2: Altitude Hold
+### Scenario 2: Altitude Hold
 
 This scenario requires implementing the pitch hold and altitude hold controllers.  They are implemented as PD and PI controllers, respectively.
 
@@ -55,7 +55,7 @@ I implemented equivalent logic, for ease of tuning in future scenarios.
 
 ![Altitude Hold Scenario Success](images/scenario2-success.PNG)
 
-#### Scenario 3: Airspeed Hold
+### Scenario 3: Airspeed Hold
 
 This scenario requires implementing a PI controller for the airspeed hold.  
 
@@ -80,7 +80,7 @@ This works! ... after making sure that the code was running on a sufficiently fa
 
 ![Airspeed Hold Scenario Success](images/scenario3-success.PNG)
 
-#### Scenario 4: Steady Climb
+### Scenario 4: Steady Climb
 
 This requires yet another PI controller -- this time, for the climb state.
 
@@ -101,7 +101,7 @@ These parameters are *negative*, unlike all of the gains seen so far -- the comm
 ![Climb Scenario Success](images/scenario4-success.PNG)
 
 
-#### Scenario 5: Longitudinal Challenge
+### Scenario 5: Longitudinal Challenge
 
 ![Longitudinal Challenge Scenario Intro](images/scenario5-intro.PNG)
 
@@ -123,10 +123,10 @@ Testing produced catastrophic crashes at threshold of 50m, the plane was not abl
 
 ---
 
-### Lateral / Directional Scenarios
+## Lateral / Directional Scenarios
 
 
-#### Scenario 6: Stabilized Roll Angle
+### Scenario 6: Stabilized Roll Angle
 
 One more PD controller; the intended roll speed is always 0.
 
@@ -145,22 +145,22 @@ Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; howe
 ![Stabilized Roll Angle Scenario Success](images/scenario6-success.PNG)
 
 
-#### Scenario 7: Coordinated Turn
+### Scenario 7: Coordinated Turn
 
 ![turn](Diagrams/sideslip_hold.PNG)
 
 ![Coordinated Turn Scenario Intro](images/scenario7-intro.PNG)
 
-#### Scenario 8: Constant Course/Yaw Hold
+### Scenario 8: Constant Course/Yaw Hold
 
-#### Scenario 9: Straight Line Following
+### Scenario 9: Straight Line Following
 
-#### Scenario 10: Orbit Following
+### Scenario 10: Orbit Following
 
-#### Scenario 11: Lateral/Directional Challenge
+### Scenario 11: Lateral/Directional Challenge
 
-### Final Challenges
+## Final Challenges
 
-#### Scenario 12: Full 3D Challenge
+### Scenario 12: Full 3D Challenge
 
-#### Scenario 13: Flying Car Challenge
+### Scenario 13: Flying Car Challenge

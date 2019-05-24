@@ -2,9 +2,9 @@
 
 This repository is an implementation of the [Udacity Flying Car Nanodegree Fixed Wing Project](https://github.com/udacity/FCND-FixedWing), an optional final project for the [Flying Car and Autonomous Flight Engineer Nanodegree](https://www.udacity.com/course/flying-car-nanodegree--nd787).
 
-The repository has been cloned from the original one -- and kept the 'solution' branch with the official implementation.
+The repository has been cloned from the staff provided project.  The original commit history is available, as well as the branch 'solution' containing the official implementation.
 
-A full writeup of this solution is available at [writeup.md](writeup.md).
+This repository contains my own implementation, and a [writeup of it](WRITEUP.md).
 
 Original README.md content follows.
 
