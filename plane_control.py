@@ -214,8 +214,12 @@ class LateralAutoPilot:
         self.state = 1
 
         # Gain parameters for roll_attitude_hold_loop PD controller
-        self.kp_roll = 5.0
-        self.kd_roll = 0.5
+        self.kp_roll = 10.0
+        self.kd_roll = 1.0
+
+        # Gain parameters for the sideslip_hold_loop PI controller
+        self.kp_sideslip = 0.0
+        self.ki_sideslip = 0.0
 
         return
 
@@ -239,7 +243,8 @@ class LateralAutoPilot:
         # Implemented as a PD controller.  Explicitly not adding an integral term, no use for Ts
 
         phi_error = phi_cmd - phi
-        aileron = self.kp_roll * phi_error + self.kd_roll * roll_rate
+        rate_error = -roll_rate
+        aileron = self.kp_roll * phi_error + self.kd_roll * rate_error
 
         return aileron
 

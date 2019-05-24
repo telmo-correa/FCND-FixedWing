@@ -146,12 +146,11 @@ One more PD controller; the intended roll speed is always 0.
 
 ![Roll Altitude Roll Control Loop](images/control_loop/roll_altitude.png)
 
-Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; however, these are tuned against the default implementation, which is about twice as tight with its gains compared to the values I am tuning.  Accordingly, once I attempt to run with my own implementation, I find satisfactory values that are about half of that:
-
+Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; these parameters work with the partially implemented script as well.
 ```
     # Gain parameters for roll_attitude_hold_loop PD controller
-    self.kp_roll = 5.0
-    self.kd_roll = 0.5
+    self.kp_roll = 10.0
+    self.kd_roll = 1.0
 ```
 
 ![Stabilized Roll Angle Scenario Success](images/scenario/scenario6_success.png)
