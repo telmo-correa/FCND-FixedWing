@@ -23,6 +23,8 @@ The fixed throttle at **65.8%** eventually leads to success:
 
 This scenario requires implementing the pitch hold and altitude hold controllers.  They are implemented as PD and PI controllers, respectively.
 
+![altitude](Diagrams/altitude_hold.png)
+
 ![Altitude Hold Scenario Intro](images/scenario2-intro.PNG)
 
 Tuning the process produces the following gains:
@@ -57,6 +59,8 @@ I implemented equivalent logic, for ease of tuning in future scenarios.
 
 This scenario requires implementing a PI controller for the airspeed hold.  
 
+![airspeed_hold](Diagrams/airspeed_hold.png)
+
 ![Airspeed Hold Scenario Intro](images/scenario3-intro.PNG)
 
 The code implementation is *almost* analogous to the implementation for the PI controller on the altitude loop -- we include a feed-forward term based on the throttle obtained for scenario 1.
@@ -79,6 +83,8 @@ This works! ... after making sure that the code was running on a sufficiently fa
 #### Scenario 4: Steady Climb
 
 This requires yet another PI controller -- this time, for the climb state.
+
+![climb](Diagrams/airspeed_pitch_hold.png)
 
 ![Climb Scenario Intro](images/scenario4-intro.PNG)
 
@@ -122,9 +128,11 @@ Testing produced catastrophic crashes at threshold of 50m, the plane was not abl
 
 #### Scenario 6: Stabilized Roll Angle
 
-![Stabilized Roll Angle Scenario Intro](images/scenario6-intro.PNG)
-
 One more PD controller; the intended roll speed is always 0.
+
+![roll](Diagrams/roll_loop.png)
+
+![Stabilized Roll Angle Scenario Intro](images/scenario6-intro.PNG)
 
 Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; however, these are tuned against the default implementation, which is about twice as tight with its gains compared to the values I am tuning.  Accordingly, once I attempt to run with my own implementation, I find satisfactory values that are about half of that:
 
@@ -138,6 +146,10 @@ Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; howe
 
 
 #### Scenario 7: Coordinated Turn
+
+![turn](Diagrams/sideslip_hold.PNG)
+
+![Coordinated Turn Scenario Intro](images/scenario7-intro.PNG)
 
 #### Scenario 8: Constant Course/Yaw Hold
 
