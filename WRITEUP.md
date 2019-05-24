@@ -160,9 +160,51 @@ Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; thes
 
 ![Coordinated Turn Scenario Intro](images/scenario/scenario7_intro.png)
 
+This scenario calls for a PI controller on beta -- the sideslip value, which should be controlled back to zero.
+
 ![Coordinated Turn Diagram](Diagrams/sideslip_hold.PNG)
 
 ![Sideslip Control Loop](images/control_loop/sideslip.png)
+
+Initial tuning provided the following gains:
+
+```
+    # Gain parameters for the sideslip_hold_loop PI controller
+    self.kp_sideslip = -2.0
+    self.ki_sideslip = -1.0
+```
+
+As suggested on the scenario, however, there is occasional instability, potentially caused by difference in integration steps.  This is remediated by implenting [trapezoidal integration](https://en.wikipedia.org/wiki/Trapezoidal_rule):
+
+```
+    def sideslip_hold_loop(self,
+                           beta, # sideslip angle
+                           T_s):
+        # Implemented as a PI controller; sideslip should be commanded to zero
+
+        beta_error = -beta
+
+        # Implementing trapeizodal integration
+        self.integrator_beta += (beta_error + self.beta_error_last) * T_s / 2
+        self.beta_error_last = beta_error
+
+        rudder_unbound = self.kp_sideslip * beta_error + self.ki_sideslip * beta_error
+
+        if rudder_unbound > 1:
+            rudder = 1
+        elif rudder_unbound < -1:
+            rudder = -1
+        else:
+            rudder = rudder_unbound
+
+        # Integrator anti-windup
+        if self.ki_sideslip != 0 and rudder != rudder_unbound:
+            self.integrator_beta += T_s / self.ki_sideslip * (rudder - rudder_unbound)
+
+        return rudder
+```
+
+![Coordinated Turn Scenario Success](images/scenario/scenario7_success.png)
 
 ### Scenario #8: Constant Course/Yaw Hold
 
