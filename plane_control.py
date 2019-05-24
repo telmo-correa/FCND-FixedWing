@@ -1,28 +1,33 @@
-
 # -*- coding: utf-8 -*-
 import numpy as np
-PI = 3.14159
+
 class LongitudinalAutoPilot(object):
     def __init__(self):
         self.max_throttle_rpm = 2500
-        self.max_elevator = 30.0*PI/180.0
-        
+
         self.min_throttle = 0.0
         self.max_throttle = 1.0
-        self.max_pitch_cmd = 30.0*np.pi/180.0
-        self.max_pitch_cmd2 = 45.0*np.pi/180.0
-        
+
+        self.min_pitch_cmd = -10.0 * np.pi / 180.0
+        self.max_pitch_cmd = 30.0 * np.pi / 180.0
+
         self.speed_int = 0.0
         self.alt_int = 0.0
         self.climb_speed_int = 0.0
-        
-        
+
+        # Gain parameters for pitch_loop PD controller
+        self.kp_pitch = 4.0
+        self.kp_q = 0.5
+
+        # Gain parameters for altitude_loop PID controller
+        self.kp_alt = 0.03
+        self.ki_alt = 0.02
         
         return
     
     
     
-    """Used to calculate the elevator command required to acheive the target
+    """Used to calculate the elevator command required to achieve the target
     pitch
     
         Args:
@@ -34,12 +39,23 @@ class LongitudinalAutoPilot(object):
             elevator_cmd: in percentage elevator [-1,1]
     """
     def pitch_loop(self, pitch, pitch_rate, pitch_cmd):
-        elevator_cmd = 0.0
-        # STUDENT CODE HERE
-        
-        
+        # Pitch loop should be implemented as a PD controller
+        # Desired pitch rate is zero
+
+        pitch_error = pitch_cmd - pitch
+        pitch_rate_error = 0 - pitch_rate
+
+        elevator_cmd = self.kp_pitch * pitch_error + self.kp_q * pitch_rate_error
+
+        # Limit elevator_cmd to [-1, 1] interval
+        if elevator_cmd > 1:
+            elevator_cmd = 1
+        elif elevator_cmd < -1:
+            elevator_cmd = -1
+
         return elevator_cmd
-    
+
+
     """Used to calculate the pitch command required to maintain the commanded
     altitude
     
@@ -52,11 +68,24 @@ class LongitudinalAutoPilot(object):
             pitch_cmd: in radians
     """
     def altitude_loop(self, altitude, altitude_cmd, dt):
-        pitch_cmd = 0.0
-        # STUDENT CODE HERE
-        
-        
-        
+        # Altitude loop should be implemented as a PI controller
+
+        altitude_error = altitude_cmd - altitude
+        self.alt_int += altitude_error * dt
+
+        pitch_cmd_unbound = self.kp_alt * altitude_error + self.ki_alt * self.alt_int
+
+        if pitch_cmd_unbound > self.max_pitch_cmd:
+            pitch_cmd = self.max_pitch_cmd
+        elif pitch_cmd_unbound < self.min_pitch_cmd:
+            pitch_cmd = self.min_pitch_cmd
+        else:
+            pitch_cmd = pitch_cmd_unbound
+
+        # Integrator anti-windup
+        if self.ki_alt != 0 and pitch_cmd != pitch_cmd_unbound:
+            self.alt_int = self.alt_int + dt / self.ki_alt * (pitch_cmd - pitch_cmd_unbound)
+
         return pitch_cmd
     
 
