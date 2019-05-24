@@ -10,7 +10,7 @@
 
 ## Longitudinal Scenarios
 
-### Scenario 1: Trim (Unity Only)
+### Scenario #1: Trim (Unity Only)
 
 ![Trim Scenario Intro](images/scenario/scenario1_intro.png)
 
@@ -21,7 +21,7 @@ The fixed throttle at **65.8%** eventually leads to success:
 ![Trim Scenario Success](images/scenario/scenario1_success.png)
 
 
-### Scenario 2: Altitude Hold
+### Scenario #2: Altitude Hold
 
 ![Altitude Hold Scenario Intro](images/scenario/scenario2_intro.png)
 
@@ -62,7 +62,7 @@ I implemented equivalent logic, for ease of tuning in future scenarios.
 
 ![Altitude Hold Scenario Success](images/scenario/scenario2_success.png)
 
-### Scenario 3: Airspeed Hold
+### Scenario #3: Airspeed Hold
 
 ![Airspeed Hold Scenario Intro](images/scenario/scenario3_intro.png)
 
@@ -89,7 +89,7 @@ This works! ... after making sure that the code was running on a sufficiently fa
 
 ![Airspeed Hold Scenario Success](images/scenario/scenario3_success.png)
 
-### Scenario 4: Steady Climb
+### Scenario #4: Steady Climb
 
 ![Climb Scenario Intro](images/scenario/scenario4_intro.png)
 
@@ -112,7 +112,7 @@ These parameters are *negative*, unlike all of the gains seen so far -- the comm
 ![Climb Scenario Success](images/scenario/scenario4_success.png)
 
 
-### Scenario 5: Longitudinal Challenge
+### Scenario #5: Longitudinal Challenge
 
 ![Longitudinal Challenge Scenario Intro](images/scenario/scenario5_intro.png)
 
@@ -136,7 +136,7 @@ Testing produced catastrophic crashes at threshold of 50m, the plane was not abl
 ## Lateral / Directional Scenarios
 
 
-### Scenario 6: Stabilized Roll Angle
+### Scenario #6: Stabilized Roll Angle
 
 ![Stabilized Roll Angle Scenario Intro](images/scenario/scenario6_intro.png)
 
@@ -156,7 +156,7 @@ Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; thes
 ![Stabilized Roll Angle Scenario Success](images/scenario/scenario6_success.png)
 
 
-### Scenario 7: Coordinated Turn
+### Scenario #7: Coordinated Turn
 
 ![Coordinated Turn Scenario Intro](images/scenario/scenario7_intro.png)
 
@@ -164,16 +164,16 @@ Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; thes
 
 ![Sideslip Control Loop](images/control_loop/sideslip.png)
 
-### Scenario 8: Constant Course/Yaw Hold
+### Scenario #8: Constant Course/Yaw Hold
 
-### Scenario 9: Straight Line Following
+### Scenario #9: Straight Line Following
 
-### Scenario 10: Orbit Following
+### Scenario #10: Orbit Following
 
-### Scenario 11: Lateral/Directional Challenge
+### Scenario #11: Lateral/Directional Challenge
 
 ## Final Challenges
 
-### Scenario 12: Full 3D Challenge
+### Scenario #12: Full 3D Challenge
 
-### Scenario 13: Flying Car Challenge
+### Scenario #13: Flying Car Challenge
