@@ -16,7 +16,7 @@ This scenario requires no coding or gains to tune -- just calibrating the values
 
 The fixed throttle at **65.8%** eventually leads to success:
 
-![Trim Scenario Success](images/sccenario1-success.PNG)
+![Trim Scenario Success](images/scenario1-success.PNG)
 
 
 ##### Scenario 2: Altitude Hold
