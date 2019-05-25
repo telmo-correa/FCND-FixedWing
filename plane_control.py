@@ -549,13 +549,78 @@ class LateralAutoPilot:
         yaw_cmd = 0.0
         cycle = False
 
-        # STUDENT CODE HERE
+        turning_radius = 500
 
+        # Extract waypoints
+        w1 = waypoint_tuple[0][0:2]
+        w2 = waypoint_tuple[1][0:2]
+        w3 = waypoint_tuple[2][0:2]
 
+        # Unit vectors for the current leg (w1 -> w2) and the next leg (w2 -> w3)
+        u12 = (w2 - w1) / np.linalg.norm(w2 - w1)
+        u23 = (w3 - w2) / np.linalg.norm(w3 - w2)
 
+        # Extract the angle between unit vectors
+        c = -np.dot(u12, u23)
+        angle = np.arccos(np.clip(c, -1, 1))
 
+        # Project the radius into the waypoint legs to obtain the distance between w2 and the orbit center
+        tangent_to_waypoint = turning_radius / np.tan(angle / 2)
 
-        return(roll_ff, yaw_cmd, cycle)
+        if self.state == 1:
+            # Line following
+
+            # Compute first tangent point
+            t1 = w2 - tangent_to_waypoint * u12
+
+            if np.dot(local_position - t1, u12) > 0:
+                # Hyperplane through tangent has been crossed, switch states to orbit following
+                self.state = 2
+                self.integrator_yaw = 0
+
+            else:
+                # Follow line from w1 to w2
+                line_origin = w1
+                line_course = np.arctan2(w2[1] - w1[1], w2[0] - w1[0])
+
+                # Controls to follow line
+                yaw_cmd = self.straight_line_guidance(line_origin=line_origin,
+                                                      line_course=line_course,
+                                                      local_position=local_position)
+                roll_ff = 0
+
+        elif self.state == 2:
+            # Orbit following
+
+            # Compute second tangent poinnt
+            t2 = w2 + tangent_to_waypoint * u23
+
+            if np.dot(local_position - t2, u23) > 0:
+                # Hyperplane through tangent has been crossed, switch states to line following
+                self.state = 1
+                self.integrator_yaw = 0
+
+                # Turn on flag to switch to next waypoint set
+                cycle = True
+
+            else:
+                # Orbit around center
+                w2_center_size = tangent_to_waypoint / np.cos(angle/2)
+                w2_center_unit = (u23 - u12) / np.linalg.norm(u23 - u12)
+                orbit_center = w2 + w2_center_size * w2_center_unit
+
+                # Clockwise iff angle between u12, u13 is less than np.pi
+                clockwise = (u12[0] * u23[1] - u12[1] * u23[0] > 0)
+
+                # Controls to follow orbit
+                yaw_cmd = self.orbit_guidance(orbit_center=orbit_center,
+                                              orbit_radius=turning_radius,
+                                              local_position=local_position,
+                                              yaw=yaw,
+                                              clockwise=clockwise)
+                roll_ff = self.coordinated_turn_ff(speed=airspeed_cmd, radius=turning_radius, cw=clockwise)
+
+        return roll_ff, yaw_cmd, cycle
 
 
 def euler2RM(roll,pitch,yaw):

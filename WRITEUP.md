@@ -386,10 +386,27 @@ It tests that counterclockwise rotation for orbit following is implemented corre
 
 As a final surprise, the ending gate is *not* at (100, -680) as indicated on the documentation, but instead at (-400, -680).  If the plane is provided with the default (0, 0) controls past this non-existing gate, the plane will turn to the sides and cause plenty of confusion, causing me to check almost every single other controller implementation.
 
+
 ![Lateral/Directional Challenge Scenario Success](images/scenario/scenario11_success.png)
 
 ## Final Challenges
 
 ### Scenario #12: Full 3D Challenge
+
+![Full 3D Challenge Scenario Intro](images/scenario/scenario12_intro.png)
+
+The implementation switches between two states, one for straight line following and another for orbit following.
+
+The logic for computing the tangent points is as follows:
+* Compute unit vectors between waypoints w1, w2 and w2, w3
+* Determine the angle between w2, w1 and w3, w2 alpha
+* Use that ratio of the orbit radius and the distance between w2 and the tangent points is tan(alpha / 2) to compute the distance between w2 and tangent points
+* Determine the tangent points as the points on the legs at the calculated distance from w2
+
+The center of the orbit can be computed from the w2, center, tangent point triangle, at the direction from w2 that is the average between legs
+
+The orientation of the orbit (clockwise or not) can be determined based on the sign of cross product between the legs.
+
+![Full 3D Challenge Scenario Success](images/scenario/scenario12_success.png)
 
 ### Scenario #13: Flying Car Challenge
