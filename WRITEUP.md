@@ -1,30 +1,33 @@
 # Optional Project: Fixed-Wing Control
 
----
-
 ## Table of Contents
 
-- [Fixed Wing Equations](#fixed-wing-equations)
+- [Preface](#preface)
+  * [Fixed Wing Equations](#fixed-wing-equations)
 - [Longitudinal Scenarios](#longitudinal-scenarios)
-  * [Scenario #1: Trim](#scenario-#1:-trim-(unity-only))
-  * [Scenario #2: Altitude Hold](#scenario-#2:-altitude-hold)
-  * [Scenario #3: Airspeed Hold](#scenario-#3:-airspeed-hold)
-  * [Scenario #4: Steady Climb](#scenario-#4:-steady-climb)
-  * [Scenario #5: Longitudinal Challenge](#scenario-#5:-longitudinal-challenge)
+  * [Scenario 1: Trim](#scenario-1:-trim-(unity-only))
+  * [Scenario 2: Altitude Hold](#scenario-2:-altitude-hold)
+  * [Scenario 3: Airspeed Hold](#scenario-3:-airspeed-hold)
+  * [Scenario 4: Steady Climb](#scenario-4:-steady-climb)
+  * [Scenario 5: Longitudinal Challenge](#scenario-5:-longitudinal-challenge)
 - [Lateral / Directional Scenarios](#lateral-/-directional-scenarios)
-  * [Scenario #6: Stabilized Roll Angle](#scenario-#6:-stabilized-roll-angle)
-  * [Scenario #7: Coordinated Turn](#scenario-#7:-coordinated-turn)
-  * [Scenario #8: Constant Course/Yaw Hold](#scenario-#8:-constant-course/yaw-hold)
-  * [Scenario #9: Straight Line Following](#scenario-#9:-straight-line-following)
-  * [Scenario #10: Orbit Following](#scenario-#10:-orbit-following)
-  * [Scenario #11: Lateral/Directional Challenge](#scenario-#11:-lateral/directional-challenge)
+  * [Scenario 6: Stabilized Roll Angle](#scenario-6:-stabilized-roll-angle)
+  * [Scenario 7: Coordinated Turn](#scenario-7:-coordinated-turn)
+  * [Scenario 8: Constant Course/Yaw Hold](#scenario-8:-constant-course/yaw-hold)
+  * [Scenario 9: Straight Line Following](#scenario-9:-straight-line-following)
+  * [Scenario 10: Orbit Following](#scenario-10:-orbit-following)
+  * [Scenario 11: Lateral/Directional Challenge](#scenario-11:-lateral/directional-challenge)
 - [Final Challenges](#final-challenges)
-  * [Scenario #12: Full 3D Challenge](#scenario-#12:-full-3d-challenge)
-  * [Scenario #13: Flying Car Challenge](#scenario-#13:-flying-car-challenge)
+  * [Scenario 12: Full 3D Challenge](#scenario-12:-full-3d-challenge)
+  * [Scenario 13: Flying Car Challenge](#scenario-13:-flying-car-challenge)
   
 ---
 
-## Fixed Wing Equations
+## Preface
+
+This file contains my solution writeup for the [Udacity Flying Car Nanodegree Fixed Wing Project](https://github.com/udacity/FCND-FixedWing).  It's structured as the original README, with a section for the implementation details of each scenario.
+
+### Fixed Wing Equations
 * The original cheatsheet with equations for this project is [available online](https://www.overleaf.com/read/cvqmtzyhqjnj).
 * A [rendered PDF](Fixed%20Wing%20Cheatsheet.pdf) has been included in this repository.
 
@@ -32,7 +35,7 @@
 
 ## Longitudinal Scenarios
 
-### Scenario #1: Trim (Unity Only)
+### Scenario 1: Trim (Unity Only)
 
 ![Trim Scenario Intro](images/scenario/scenario1_intro.png)
 
@@ -43,7 +46,7 @@ The fixed throttle at **65.8%** eventually leads to success:
 ![Trim Scenario Success](images/scenario/scenario1_success.png)
 
 
-### Scenario #2: Altitude Hold
+### Scenario 2: Altitude Hold
 
 ![Altitude Hold Scenario Intro](images/scenario/scenario2_intro.png)
 
@@ -84,7 +87,7 @@ I implemented equivalent logic, for ease of tuning in future scenarios.
 
 ![Altitude Hold Scenario Success](images/scenario/scenario2_success.png)
 
-### Scenario #3: Airspeed Hold
+### Scenario 3: Airspeed Hold
 
 ![Airspeed Hold Scenario Intro](images/scenario/scenario3_intro.png)
 
@@ -111,7 +114,7 @@ This works! ... after making sure that the code was running on a sufficiently fa
 
 ![Airspeed Hold Scenario Success](images/scenario/scenario3_success.png)
 
-### Scenario #4: Steady Climb
+### Scenario 4: Steady Climb
 
 ![Climb Scenario Intro](images/scenario/scenario4_intro.png)
 
@@ -134,7 +137,7 @@ These parameters are *negative*, unlike all of the gains seen so far -- the comm
 ![Climb Scenario Success](images/scenario/scenario4_success.png)
 
 
-### Scenario #5: Longitudinal Challenge
+### Scenario 5: Longitudinal Challenge
 
 ![Longitudinal Challenge Scenario Intro](images/scenario/scenario5_intro.png)
 
@@ -158,7 +161,7 @@ Testing produced catastrophic crashes at threshold of 50m, the plane was not abl
 ## Lateral / Directional Scenarios
 
 
-### Scenario #6: Stabilized Roll Angle
+### Scenario 6: Stabilized Roll Angle
 
 ![Stabilized Roll Angle Scenario Intro](images/scenario/scenario6_intro.png)
 
@@ -178,7 +181,7 @@ Tuning allows for a controller with gains as aggressive as Kp = 10, Ki = 1; thes
 ![Stabilized Roll Angle Scenario Success](images/scenario/scenario6_success.png)
 
 
-### Scenario #7: Coordinated Turn
+### Scenario 7: Coordinated Turn
 
 ![Coordinated Turn Scenario Intro](images/scenario/scenario7_intro.png)
 
@@ -228,7 +231,7 @@ As suggested on the scenario, however, there is occasional instability, potentia
 
 ![Coordinated Turn Scenario Success](images/scenario/scenario7_success.png)
 
-### Scenario #8: Constant Course/Yaw Hold
+### Scenario 8: Constant Course/Yaw Hold
 
 ![Constant Course/Yaw Hold Scenario Intro](images/scenario/scenario8_intro.png)
 
@@ -266,7 +269,7 @@ Tuning using Unity also failed to work for this scenario -- the behavior seems u
 
 ![Constant Course/Yaw Hold Scenario Success](images/scenario/scenario8_success.png)
 
-### Scenario #9: Straight Line Following
+### Scenario 9: Straight Line Following
 
 ![Straight Line Following Scenario Intro](images/scenario/scenario9_intro.png)
 
@@ -330,7 +333,7 @@ Instead, we should build a controller that depends only on something invariable 
 	self.kp_course = -0.003
 ```
 
-### Scenario #10: Orbit Following
+### Scenario 10: Orbit Following
 
 ![Orbit Following Scenario Intro](images/scenario/scenario10_intro.png)
 
@@ -377,7 +380,7 @@ This implementation is analogous to the official solution, but should be much si
 
 ![Orbit Following Scenario Success](images/scenario/scenario10_success.png)
 
-### Scenario #11: Lateral/Directional Challenge
+### Scenario 11: Lateral/Directional Challenge
 
 ![Lateral/Directional Challenge Scenario Intro](images/scenario/scenario11_intro.png)
 
@@ -391,6 +394,6 @@ As a final surprise, the ending gate is *not* at (100, -680) as indicated on the
 
 ## Final Challenges
 
-### Scenario #12: Full 3D Challenge
+### Scenario 12: Full 3D Challenge
 
-### Scenario #13: Flying Car Challenge
+### Scenario 13: Flying Car Challenge
