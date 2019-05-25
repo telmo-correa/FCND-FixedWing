@@ -410,3 +410,19 @@ The orientation of the orbit (clockwise or not) can be determined based on the s
 ![Full 3D Challenge Scenario Success](images/scenario/scenario12_success.png)
 
 ### Scenario #13: Flying Car Challenge
+
+![Flying Car Challenge Scenario Intro](images/scenario/scenario13_intro.png)
+
+Unlike the other scenarios, this final challenge does not have the hooks yet implemented on `fixed_wing_project.py`; multiple TODOs are originally in place.  We get a large amount of freedom to design this controller.
+
+I set to implement a simple solution, if not the most energy efficient:
+* Takeoff vertically
+* Keep going up and rotate towards the objective
+* Fly in a straight line towards the objective in fixed-wing mode
+* Some distance before the objective, turn back to hybrid mode and decelerate until on top of objective
+* Lower vehicle in VTOL mode and rotate to desired yaw
+* Land
+
+A flight planner is implemented as a class `FlyingCarPlanner`.  It does not maintain state; it is merely responsible for generating waypoints, checking whether a position reached a waypoint, and generating instructions for the plane control to execute.
+
+Work on this scenario is ongoing -- I am currently running into some issues performing vertical takeoff.

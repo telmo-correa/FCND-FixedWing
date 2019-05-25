@@ -7,6 +7,7 @@ import numpy as np
 from plane_drone import Udaciplane
 from plane_control import LongitudinalAutoPilot
 from plane_control import LateralAutoPilot
+from plane_control import FlyingCarPlanner
 from plane_control import euler2RM
 import time
 import sys
@@ -36,6 +37,8 @@ class FixedWingProject(Udaciplane):
                 
         self.longitudinal_autopilot = LongitudinalAutoPilot()
         self.lateral_autopilot = LateralAutoPilot()
+        self.flying_car_planner = FlyingCarPlanner()
+
         # Defined as [along_track_distance (meters), altitude (meters)]
         self.longitudinal_gates = [np.array([200.0, 200.0]),
                                    np.array([1100.0, 300.0]),
@@ -68,7 +71,9 @@ class FixedWingProject(Udaciplane):
         self.waypoint_tuple = (np.array([0.0, 0.0, 0.0]),
                                np.array([0.0, 0.0, 0.0]),
                                np.array([0.0, 0.0, 0.0]))
-        
+
+        self.waypoints_flying_car = []
+
         self.scenario = Scenario.SANDBOX
         
         self.time_cmd = 0.0
@@ -155,7 +160,18 @@ class FixedWingProject(Udaciplane):
         
         if self.scenario == Scenario.FLYINGCAR:
             # TODO: Insert Flying Car Scenario code here
-            pass
+            # Control only during flight mode
+            if len(self.waypoints_flying_car) != 0 \
+                    and self.waypoints_flying_car[0]['cmd'] == FlyingCarPlanner.WaypointCommand.FLIGHT:
+                self.rudder_cmd = self.lateral_autopilot.sideslip_hold_loop(
+                    self.sideslip, dt)
+                altitude = -self.local_position[2]
+                (self.pitch_cmd, self.throttle_cmd) = \
+                    self.longitudinal_autopilot.longitudinal_loop(
+                        self.airspeed, altitude, self.airspeed_cmd,
+                        self.altitude_cmd, dt)
+
+        pass
     
     def attitude_callback(self):
         dt = 0.0
@@ -204,7 +220,14 @@ class FixedWingProject(Udaciplane):
             
         if self.scenario == Scenario.FLYINGCAR:
             # TODO: Insert Flying Car Scenario code here
-            pass
+            # Control only during flight mode
+            if len(self.waypoints_flying_car) != 0 \
+                    and self.waypoints_flying_car[0]['cmd'] == FlyingCarPlanner.WaypointCommand.FLIGHT:
+                self.aileron_cmd = self.lateral_autopilot.roll_attitude_hold_loop(
+                    self.roll_cmd, self.attitude[0], self.gyro_raw[0])
+                self.elevator_cmd = self.longitudinal_autopilot.pitch_loop(
+                    self.attitude[1], self.gyro_raw[1], self.pitch_cmd)
+                self.cmd_controls(self.aileron_cmd, self.elevator_cmd, self.rudder_cmd, self.throttle_cmd)
     
     def local_position_callback(self):
         dt = 0.0
@@ -262,6 +285,48 @@ class FixedWingProject(Udaciplane):
         
         if self.scenario == Scenario.FLYINGCAR:
             # TODO: Insert Flying Car Scenario code here
+            if len(self.waypoints_flying_car) == 0:
+                return
+
+            (flying_car_cmd, switch) = self.flying_car_planner.waypoint_follower(
+                target_waypoint=self.waypoints_flying_car[0],
+                local_position=self.local_position,
+                yaw=self.attitude[2],
+                airspeed=self.airspeed_cmd)
+
+            if switch:
+                completed_waypoint = self.waypoints_flying_car.pop(0)
+                print('Completed waypoint: ', completed_waypoint)
+                if len(self.waypoints_flying_car) != 0:
+                    print('Next waypoint: ', self.waypoints_flying_car[0])
+
+            else:
+                current_cmd = self.waypoints_flying_car[0]['cmd']
+                if current_cmd == FlyingCarPlanner.WaypointCommand.TAKEOFF:
+                    print('takeoff', flying_car_cmd)
+                    self.takeoff(flying_car_cmd)
+
+                elif current_cmd == FlyingCarPlanner.WaypointCommand.VTOL:
+                    # Use absolute position control
+                    print('cmd_vtol_position', flying_car_cmd)
+                    self.cmd_vtol_position(north=flying_car_cmd[0],
+                                           east=flying_car_cmd[1],
+                                           altitude=flying_car_cmd[2],
+                                           heading=flying_car_cmd[3])
+
+                elif current_cmd == FlyingCarPlanner.WaypointCommand.FLIGHT:
+                    # Use straight line guidance
+                    print('straight_line_guidance', flying_car_cmd)
+                    self.yaw_cmd = self.lateral_autopilot.straight_line_guidance(
+                        line_origin=flying_car_cmd[0],
+                        line_course=flying_car_cmd[1],
+                        local_position=self.local_position)
+                    self.roll_ff = 0
+
+                elif current_cmd == FlyingCarPlanner.WaypointCommand.LANDING:
+                    print('land')
+                    self.land()
+
             pass
 
     def init_scenario(self):
@@ -330,7 +395,15 @@ class FixedWingProject(Udaciplane):
             self.altitude_cmd = -self.waypoint_tuple[0][2]
         elif self.scenario == Scenario.FLYINGCAR:
             # TODO: Insert Flying Car Scenario code here
-            pass
+            print('Starting Flying Car Challenge')
+            self.waypoints_flying_car = self.flying_car_planner.build_waypoints(
+                start_location=self.local_position,
+                start_yaw=0,
+                end_location=self.local_position + np.array([1545, -1816, -80]),
+                end_yaw=np.pi
+            )
+            print('Initial waypoints:', self.waypoints_flying_car)
+
         else:
             print('Invalid Scenario')
             return

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from enum import Enum
 
 
 class LongitudinalAutoPilot(object):
@@ -621,6 +622,205 @@ class LateralAutoPilot:
                 roll_ff = self.coordinated_turn_ff(speed=airspeed_cmd, radius=turning_radius, cw=clockwise)
 
         return roll_ff, yaw_cmd, cycle
+
+
+class FlyingCarPlanner:
+
+    def __init__(self):
+        self.takeoff_altitude_before_turn = 20
+        self.landing_altitude_after_turn = 20
+
+        self.flight_altitude = 100
+        self.decelerate_distance = 100
+
+        self.max_yaw_error = 1 * np.pi / 180
+        self.max_vtol_xyz_error = 5
+        self.max_vtol_speed_error = 0.1
+
+        self.max_flight_xyz_error = 5
+
+        return
+
+    class WaypointCommand(Enum):
+        TAKEOFF = 1
+        VTOL = 2
+        FLIGHT = 3
+        LANDING = 4
+
+    """Used to create a series of waypoints for a flying car path between both locations.
+    
+        Args:
+            start_location: start position for the vehicle in meters [N, E, D]
+            start_yaw: start yaw for the vehicle, in radians
+            end_location: end position for the vehicle in meters [N, E, D]
+            end_yaw: end yaw for the vehicle, in radians
+            
+        Returns:
+            waypoints: array of dictionary objects, each with one of the following forms:
+                * {cmd: WaypointCommand.TAKEOFF, altitude: d}
+                * {cmd: WaypointCommand.VTOL, position: [n, e, d], yaw = yaw}
+                * {cmd: WaypointCommant.FLIGHT, position: [n, e, d]]
+                * {cmd: Waypoing.LANDING}
+    """
+    def build_waypoints(self, start_location, start_yaw, end_location, end_yaw):
+        # A flight path consists of the following waypoints:
+        #  - TAKEOFF to safe altitude
+        #  - VTOL to flight altitude rotating to correct flight heading
+        #  - Fly towards destination
+        #  - VTOL decelerate to a position above the end location, at flight altitude
+        #  - VTOL down to safe landing altitude, rotating to correct yaw
+        #  - VTOL down without rotation to land
+
+        waypoints = []
+
+        trajectory = end_location - start_location
+        trajectory_unit = trajectory / np.linalg.norm(trajectory)
+
+        flight_line_yaw = np.arctan2(trajectory[1], trajectory[0])
+        deceleration_start = end_location - self.decelerate_distance * trajectory_unit
+
+        # Lift to initial altitude
+        safe_takeoff_altitude = start_location[2] + self.takeoff_altitude_before_turn
+        waypoints.append({
+            'cmd': FlyingCarPlanner.WaypointCommand.TAKEOFF,
+            'altitude': safe_takeoff_altitude
+        })
+
+        # Turn to target yaw
+        waypoints.append({
+            'cmd': FlyingCarPlanner.WaypointCommand.VTOL,
+            'position': [start_location[0], start_location[1], self.flight_altitude],
+            'yaw': flight_line_yaw
+        })
+
+        # Fly to next waypoint
+        waypoints.append({
+            'cmd': FlyingCarPlanner.WaypointCommand.FLIGHT,
+            'position': [deceleration_start[0], deceleration_start[1], self.flight_altitude]
+        })
+
+        # Decelerate
+        waypoints.append({
+            'cmd': FlyingCarPlanner.WaypointCommand.VTOL,
+            'position': [end_location[0], end_location[1], self.flight_altitude],
+            'yaw': flight_line_yaw
+        })
+
+        # VTOL lower and rotate
+        safe_landing_altitude = end_location[2] + self.landing_altitude_after_turn
+        if safe_landing_altitude > self.flight_altitude:
+            safe_landing_altitude = self.flight_altitude
+
+        waypoints.append({
+            'cmd': FlyingCarPlanner.WaypointCommand.VTOL,
+            'position': [end_location[0], end_location[1], safe_landing_altitude],
+            'yaw': end_yaw
+        })
+
+        # VTOL land
+        waypoints.append({
+            'cmd': FlyingCarPlanner.WaypointCommand.LANDING
+        })
+
+        return waypoints
+
+    """Used to determine whether the provided waypoint has been reached
+    
+        Args:
+            target_waypoint: a waypoint dict as returned by build_waypoints
+            local_position: the current position of the vehicle in meters [N, E, D]
+            yaw: the current yaw of the vehicle
+            airspeed: the current airspeed of the vehicle
+            
+        Returns:
+            boolean, whether the waypoint has been reached
+    """
+    def _waypoint_reached(self, target_waypoint, local_position, yaw, airspeed):
+
+        waypoint_cmd = target_waypoint['cmd']
+
+        if waypoint_cmd == FlyingCarPlanner.WaypointCommand.TAKEOFF:
+            # Check distance
+            if abs(local_position[2] - target_waypoint['altitude']) > self.max_vtol_xyz_error:
+                return False
+
+        elif waypoint_cmd == FlyingCarPlanner.WaypointCommand.VTOL:
+            # Check speed
+            if abs(airspeed) > self.max_vtol_speed_error:
+                return False
+
+            # Check yaw
+            waypoint_yaw = target_waypoint['yaw']
+            if abs(FlyingCarPlanner.fmod(waypoint_yaw - yaw)) > self.max_yaw_error:
+                return False
+
+            # Check distance
+            waypoint_ned = target_waypoint['position']
+            if np.linalg.norm(waypoint_ned - local_position) > self.max_vtol_xyz_error:
+                return False
+
+            return True
+
+        # Check distance
+        elif waypoint_cmd == FlyingCarPlanner.WaypointCommand.FLIGHT:
+            waypoint_ned = target_waypoint['position']
+            if np.linalg.norm(waypoint_ned - local_position) > self.max_vtol_xyz_error:
+                return False
+
+        return True
+
+    """Used for selecting the controls between for a given waypoint 
+       
+        Args:
+            target_waypoint: current waypoint target, as returned by build_waypoints
+            local_position: current vehicle position, in meters [N, E, D]
+            yaw: current vehicle yaw, in radians
+            airspeed: current vehicle speed, in m/s
+            
+        Returns:
+            flying_car_cmd: one of:
+                - takeoff instructions [altitude] 
+                - VTOL flight command [north, east, altitude, holding]
+                - plane flight command [line_origin, line_course]
+                - landing instructions (None)
+            cycle: True=cycle waypoints (at the end of orbit segment)
+    """
+    def waypoint_follower(self, target_waypoint, local_position, yaw, airspeed):
+        flying_car_cmd = None
+        cycle = False
+
+        waypoint_cmd = target_waypoint['cmd']
+
+        if self._waypoint_reached(target_waypoint, local_position, yaw, airspeed):
+            cycle = True
+
+        elif waypoint_cmd == FlyingCarPlanner.WaypointCommand.TAKEOFF:
+            flying_car_cmd = target_waypoint['altitude']
+
+        elif waypoint_cmd == FlyingCarPlanner.WaypointCommand.VTOL:
+            target_position = target_waypoint['position']
+            target_heading = target_waypoint['yaw']
+            flying_car_cmd = [target_position[0], target_position[1], target_position[2], target_heading]
+
+        elif waypoint_cmd == FlyingCarPlanner.WaypointCommand.FLIGHT:
+            line_origin = local_position
+            line_vector = target_waypoint['position'] - local_position
+            line_course = np.arctan(line_vector[1], line_vector[0])
+            flying_car_cmd = [line_origin, line_course]
+
+        return flying_car_cmd, cycle
+
+    """Used to limit angles to values between -pi and pi
+    
+       Args:
+           theta: angle to limit between -pi and pi
+           
+       Returns:
+           value between -pi and pi
+    """
+    @staticmethod
+    def fmod(theta):
+        return theta if abs(theta) < np.pi else (theta + np.pi) % (2 * np.pi) - np.pi
 
 
 def euler2RM(roll,pitch,yaw):
