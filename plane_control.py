@@ -230,7 +230,7 @@ class LateralAutoPilot:
         self.ki_yaw = 0.4
 
         # Gain parameters for the straight_line_guidance P controller
-        self.kp_course = -0.01
+        self.kp_course = 0.000015
 
         # Gain parameters for the orbit_guidance P controller
         self.kp_orbit_guidance = 2.5
@@ -363,16 +363,31 @@ class LateralAutoPilot:
     """
     def straight_line_guidance(self, line_origin, line_course,
                                local_position):
-        # Compute the N, E orientation components on the inertial frame
-        orientation_n = line_origin[0] - local_position[0]
-        orientation_e = line_origin[1] - local_position[1]
+        # Compute the vector v from the line origin to the local position
+        v_n = local_position[0] - line_origin[0]
+        v_e = local_position[1] - line_origin[1]
 
-        # Compute the orientation angle and error on the inertial frame
-        orientation_angle = np.arctan2(orientation_e, orientation_n)
-        orientation_error = line_course - orientation_angle
+        # Compute the projection of v onto a unit vector with angle line_course
+        sin_theta = np.sin(line_course)
+        cos_theta = np.cos(line_course)
 
-        # Control the error to zero
-        course_cmd = self.kp_course * orientation_error
+        v_dot_s = v_n * cos_theta + v_e * sin_theta
+
+        # s_dot_s is 1 (unit vector), so the vector from the line origin to the projected point is:
+        p_n = v_dot_s * cos_theta
+        p_e = v_dot_s * sin_theta
+
+        # Finally, converting it back into the world origin, we get the orthogonal projection of the
+        # line onto the origin:
+        proj_n = p_n + line_origin[0]
+        proj_e = p_e + line_origin[1]
+
+        # Now, we can control the cross product between the line course and the vector between projected point
+        # and local position down to zero:
+        error_vector = proj_n * local_position[1] - proj_e * local_position[0]
+
+        # Control the error (as an angle of an arbitrary large orbit) to zero
+        course_cmd = np.arctan(-self.kp_course * error_vector)
 
         return course_cmd
 
