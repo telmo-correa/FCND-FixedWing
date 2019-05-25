@@ -2,7 +2,29 @@
 
 ---
 
-#### Fixed Wing Equations
+## Table of Contents
+
+- [Fixed Wing Equations](#fixed-wing-equations)
+- [Longitudinal Scenarios](#longitudinal-scenarios)
+  * [Scenario #1: Trim](#scenario-#1:-trim-(unity-only))
+  * [Scenario #2: Altitude Hold](#scenario-#2:-altitude-hold)
+  * [Scenario #3: Airspeed Hold](#scenario-#3:-airspeed-hold)
+  * [Scenario #4: Steady Climb](#scenario-#4:-steady-climb)
+  * [Scenario #5: Longitudinal Challenge](#scenario-#5:-longitudinal-challenge)
+- [Lateral / Directional Scenarios](#lateral-/-directional-scenarios)
+  * [Scenario #6: Stabilized Roll Angle](#scenario-#6:-stabilized-roll-angle)
+  * [Scenario #7: Coordinated Turn](#scenario-#7:-coordinated-turn)
+  * [Scenario #8: Constant Course/Yaw Hold](#scenario-#8:-constant-course/yaw-hold)
+  * [Scenario #9: Straight Line Following](#scenario-#9:-straight-line-following)
+  * [Scenario #10: Orbit Following](#scenario-#10:-orbit-following)
+  * [Scenario #11: Lateral/Directional Challenge](#scenario-#11:-lateral/directional-challenge)
+- [Final Challenges](#final-challenges)
+  * [Scenario #12: Full 3D Challenge](#scenario-#12:-full-3d-challenge)
+  * [Scenario #13: Flying Car Challenge](#scenario-#13:-flying-car-challenge)
+  
+---
+
+## Fixed Wing Equations
 * The original cheatsheet with equations for this project is [available online](https://www.overleaf.com/read/cvqmtzyhqjnj).
 * A [rendered PDF](Fixed%20Wing%20Cheatsheet.pdf) has been included in this repository.
 
