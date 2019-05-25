@@ -230,7 +230,7 @@ class LateralAutoPilot:
         self.ki_yaw = 0.4
 
         # Gain parameters for the straight_line_guidance P controller
-        self.kp_course = 0.000015
+        self.kp_course = 0.005
 
         # Gain parameters for the orbit_guidance P controller
         self.kp_orbit_guidance = 2.5
@@ -382,12 +382,13 @@ class LateralAutoPilot:
         proj_n = p_n + line_origin[0]
         proj_e = p_e + line_origin[1]
 
-        # Now, we can control the cross product between the line course and the vector between projected point
-        # and local position down to zero:
-        error_vector = proj_n * local_position[1] - proj_e * local_position[0]
+        # We want to control the (signed) distance between projection and local position down to zero:
+        proj_size = np.sqrt((proj_n - local_position[0]) ** 2 + (proj_e - local_position[1]) ** 2)
+        proj_angle = np.arctan2(proj_e - local_position[1], proj_n - local_position[0])
+        proj_sign = 1 if LateralAutoPilot.fmod(proj_angle - line_course) > 0 else -1
 
         # Control the error (as an angle of an arbitrary large orbit) to zero
-        course_cmd = np.arctan(-self.kp_course * error_vector)
+        course_cmd = np.arctan(self.kp_course * proj_sign * proj_size)
 
         return course_cmd
 
@@ -473,12 +474,74 @@ class LateralAutoPilot:
     """
     def path_manager(self, local_position, yaw, airspeed_cmd):
 
+        # Initialize roll and yaw commands
         roll_ff = 0
         yaw_cmd = 0
-        # STUDENT CODE HERE
 
+        # Pick the next target gate, fall through if gate reached
+        if self.gate == 1:
+            target = [500, 20]
+            distance_sq = (local_position[0] - target[0]) ** 2 + (local_position[1] - target[1]) ** 2
+            if distance_sq < 100:
+                self.gate = 2
+                self.integrator_yaw = 0
+            else:
+                line_origin = [0, 20]
+                line_course = 0
+                yaw_cmd = self.straight_line_guidance(line_origin=line_origin,
+                                                      line_course=line_course,
+                                                      local_position=local_position)
+                roll_ff = 0
 
-        return(roll_ff,yaw_cmd)
+        if self.gate == 2:
+            target = [900, -380]
+            distance_sq = (local_position[0] - target[0]) ** 2 + (local_position[1] - target[1]) ** 2
+            if distance_sq < 100:
+                self.gate = 3
+                self.integrator_yaw = 0
+            else:
+                orbit_center = [500, -380]
+                orbit_radius = 400
+                clockwise = False
+                yaw_cmd = self.orbit_guidance(orbit_center=orbit_center,
+                                              orbit_radius=orbit_radius,
+                                              yaw=yaw,
+                                              clockwise=clockwise,
+                                              local_position=local_position)
+                roll_ff = self.coordinated_turn_ff(speed=airspeed_cmd, radius=orbit_radius, cw=clockwise)
+
+        if self.gate == 3:
+            target = [600, -680]
+            distance_sq = (local_position[0] - target[0]) ** 2 + (local_position[1] - target[1]) ** 2
+            if distance_sq < 100:
+                self.gate = 4
+                self.integrator_yaw = 0
+            else:
+                orbit_center = [600, -380]
+                orbit_radius = 300
+                clockwise = False
+                yaw_cmd = self.orbit_guidance(orbit_center=orbit_center,
+                                              orbit_radius=orbit_radius,
+                                              yaw=yaw,
+                                              clockwise=clockwise,
+                                              local_position=local_position)
+                roll_ff = self.coordinated_turn_ff(speed=airspeed_cmd, radius=orbit_radius, cw=clockwise)
+
+        if self.gate == 4:
+            target = [100, -680]
+            distance_sq = (local_position[0] - target[0]) ** 2 + (local_position[1] - target[1]) ** 2
+            if distance_sq < 100:
+                self.gate = 5
+                self.integrator_yaw = 0
+            else:
+                line_origin = [600, -680]
+                line_course = np.pi
+                yaw_cmd = self.straight_line_guidance(line_origin=line_origin,
+                                                      line_course=line_course,
+                                                      local_position=local_position)
+                roll_ff = 0
+
+        return roll_ff, yaw_cmd
 
 
     """Used to calculate the desired course angle and feed-forward roll

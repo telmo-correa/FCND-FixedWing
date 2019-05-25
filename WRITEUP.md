@@ -289,35 +289,36 @@ Instead, we should build a controller that depends only on something invariable 
         # Compute the vector v from the line origin to the local position
         v_n = local_position[0] - line_origin[0]
         v_e = local_position[1] - line_origin[1]
-    
+
         # Compute the projection of v onto a unit vector with angle line_course
         sin_theta = np.sin(line_course)
         cos_theta = np.cos(line_course)
-    
+
         v_dot_s = v_n * cos_theta + v_e * sin_theta
-    
+
         # s_dot_s is 1 (unit vector), so the vector from the line origin to the projected point is:
         p_n = v_dot_s * cos_theta
         p_e = v_dot_s * sin_theta
-    
+
         # Finally, converting it back into the world origin, we get the orthogonal projection of the
         # line onto the origin:
         proj_n = p_n + line_origin[0]
         proj_e = p_e + line_origin[1]
-    
-        # Now, we can control the cross product between the line course and the vector between projected point
-        # and local position down to zero:
-        error_vector = proj_n * local_position[1] - proj_e * local_position[0]
-    
+
+        # We want to control the (signed) distance between projection and local position down to zero:
+        proj_size = np.sqrt((proj_n - local_position[0]) ** 2 + (proj_e - local_position[1]) ** 2)
+        proj_angle = np.arctan2(proj_e - local_position[1], proj_n - local_position[0])
+        proj_sign = 1 if LateralAutoPilot.fmod(proj_angle - line_course) > 0 else -1
+
         # Control the error (as an angle of an arbitrary large orbit) to zero
-        course_cmd = np.arctan(-self.kp_course * error_vector)
-    
+        course_cmd = np.arctan(self.kp_course * proj_sign * proj_size)
+
         return course_cmd
 ```
 
 ```
 	# Gain parameters for the straight_line_guidance P controller
-	self.kp_course = 0.000015
+	self.kp_course = 0.005
 ```
 
 ### Scenario #10: Orbit Following
