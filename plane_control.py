@@ -419,12 +419,14 @@ class LateralAutoPilot:
         distance_error = center_to_location_distance - orbit_radius
         # Express error as angle / function of orbit
         angle_error = np.arctan(self.kp_orbit_guidance * distance_error / orbit_radius)
+        if not clockwise:
+            angle_error = -angle_error
 
         # Compute tangent route orientation as feedforward -- rotate to get tangent from vector from orbit center
         if clockwise:
-            tangent_angle = center_to_location_orientation - np.pi / 2
-        else:
             tangent_angle = center_to_location_orientation + np.pi / 2
+        else:
+            tangent_angle = center_to_location_orientation - np.pi / 2
 
         # Combine feedforward and error and limit between -pi and pi
         course_cmd = angle_error + tangent_angle
