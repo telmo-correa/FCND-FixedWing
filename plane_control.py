@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+
 class LongitudinalAutoPilot(object):
     def __init__(self):
         self.max_throttle_rpm = 2500
@@ -40,7 +41,6 @@ class LongitudinalAutoPilot(object):
 
         return
 
-
     """Used to calculate the elevator command required to achieve the target
     pitch
     
@@ -68,7 +68,6 @@ class LongitudinalAutoPilot(object):
             elevator_cmd = -1
 
         return elevator_cmd
-
 
     """Used to calculate the pitch command required to maintain the commanded
     altitude
@@ -101,7 +100,6 @@ class LongitudinalAutoPilot(object):
             self.alt_int += dt / self.ki_alt * (pitch_cmd - pitch_cmd_unbound)
 
         return pitch_cmd
-
 
     """Used to calculate the throttle command required command the target 
     airspeed
@@ -137,7 +135,6 @@ class LongitudinalAutoPilot(object):
 
         return throttle_cmd
 
-
     """Used to calculate the pitch command required to maintain the commanded
     airspeed
     
@@ -167,7 +164,6 @@ class LongitudinalAutoPilot(object):
             self.climb_speed_int += dt / self.ki_speed_pitch * (pitch_cmd - pitch_cmd_unbound)
 
         return pitch_cmd
-
 
     """Used to calculate the pitch command and throttle command based on the
     aicraft altitude error
@@ -200,7 +196,6 @@ class LongitudinalAutoPilot(object):
             pitch_cmd = self.altitude_loop(altitude, altitude_cmd, dt)
 
         return[pitch_cmd, throttle_cmd]
-
 
 
 class LateralAutoPilot:
@@ -237,7 +232,6 @@ class LateralAutoPilot:
 
         return
 
-
     """Used to limit angles to values between -pi and pi
     
        Args:
@@ -273,7 +267,6 @@ class LateralAutoPilot:
         aileron = self.kp_roll * phi_error + self.kd_roll * rate_error
 
         return aileron
-
 
     """Used to calculate the commanded roll angle from the course/yaw angle
     
@@ -313,7 +306,6 @@ class LateralAutoPilot:
             self.integrator_yaw += T_s / self.ki_yaw * LateralAutoPilot.fmod(roll_cmd - roll_cmd_unbound)
 
         return roll_cmd
-
 
     """Used to calculate the commanded rudder based on the sideslip
     
@@ -422,7 +414,6 @@ class LateralAutoPilot:
 
         return course_cmd
 
-
     """Used to calculate the feedforward roll angle for a constant radius
     coordinated turn
     
@@ -444,7 +435,6 @@ class LateralAutoPilot:
             roll_ff = -roll_ff
 
         return roll_ff
-
 
     """Used to calculate the desired course angle and feed-forward roll
     depending on which phase of lateral flight (orbit or line following) the 
@@ -537,9 +527,7 @@ class LateralAutoPilot:
                                                   local_position=local_position)
             roll_ff = 0
 
-
         return roll_ff, yaw_cmd
-
 
     """Used to calculate the desired course angle and feed-forward roll
     depending on which phase of lateral flight (orbit or line following) the 
@@ -565,8 +553,9 @@ class LateralAutoPilot:
 
 
 
-        return(roll_ff, yaw_cmd, cycle)
 
+
+        return(roll_ff, yaw_cmd, cycle)
 
 
 def euler2RM(roll,pitch,yaw):
