@@ -11,7 +11,7 @@
   * [Scenario #4: Steady Climb](#scenario-4-steady-climb)
   * [Scenario #5: Longitudinal Challenge](#scenario-5-longitudinal-challenge)
 - [Lateral / Directional Scenarios](#lateral--directional-scenarios)
-  * [Scenario #6: Stabilized Roll Angle](#scenario-6:-stabilized-roll-angle)
+  * [Scenario #6: Stabilized Roll Angle](#scenario-6-stabilized-roll-angle)
   * [Scenario #7: Coordinated Turn](#scenario-7-coordinated-turn)
   * [Scenario #8: Constant Course/Yaw Hold](#scenario-8-constant-courseyaw-hold)
   * [Scenario #9: Straight Line Following](#scenario-9-straight-line-following)
