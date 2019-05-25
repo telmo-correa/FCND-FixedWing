@@ -292,7 +292,7 @@ class FixedWingProject(Udaciplane):
             self.rudder_cmd = 0.0
         elif self.scenario == Scenario.TURN:
             print('Starting Coordinated Turn Scenario')
-            self.airpseed_cmd = 41.0
+            self.airspeed_cmd = 41.0
             self.altitude_cmd = 450.0
             self.roll_cmd = 45.0*np.pi/180.0
             self.sideslip_cmd = 0.0
