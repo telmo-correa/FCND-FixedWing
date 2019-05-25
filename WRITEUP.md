@@ -212,7 +212,7 @@ As suggested on the scenario, however, there is occasional instability, potentia
 
 This scenario calls for a PI controller for the yaw.
 
-![Constant Course/Yaw Hold Diagram](Diagrams/course_hold.PNG)
+![Constant Course/Yaw Hold Diagram](Diagrams/course_hold.png)
 
 ![Course Control Loop](images/control_loop/course.png)
 
