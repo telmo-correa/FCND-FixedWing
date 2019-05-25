@@ -265,7 +265,7 @@ This scenario asks us to implement `straight_line_guidance`.
         orientation_error = line_course - orientation_angle
 
         # Control the error to zero
-        course_cmd = self.kp_course * orientation_error
+        course_cmd = self.kp_course * orientation_error + line_course
 
         return course_cmd
 ```
@@ -281,44 +281,31 @@ The initial guess for a tuning parameter worked well enough, once I adjusted its
 
 ... however, this implementation leaves to desire in that the results are dependent on how the semi-line is specified.  The control is effected on the angle between the line origin and the local position -- so a different line origin for the same line would cause different control.
 
-Instead, we should build a controller that depends only on something invariable about the abstraction -- in this case, the distance between the local position and the line.  Somewhat more complex code, and a different tuning parameter:
+Instead, we should build a controller that depends only on something invariable about the abstraction -- in this case, the distance between the local position and the line.  The following implementation controls the distance between the point and the line via the angle that observes it, from the line, some arbitrary distance behind (controlled by the gain parameter):
 
 ```
     def straight_line_guidance(self, line_origin, line_course,
                                local_position):
-        # Compute the vector v from the line origin to the local position
-        v_n = local_position[0] - line_origin[0]
-        v_e = local_position[1] - line_origin[1]
 
-        # Compute the projection of v onto a unit vector with angle line_course
-        sin_theta = np.sin(line_course)
-        cos_theta = np.cos(line_course)
+        # Compute the distance between the local position and its projection on the line
+        v_n = line_origin[0] - local_position[0]
+        v_e = line_origin[1] - local_position[1]
 
-        v_dot_s = v_n * cos_theta + v_e * sin_theta
+        proj_angle = np.arctan2(v_e, v_n) - line_course
+        line_distance = np.sqrt(v_n**2 + v_e**2) * np.sin(proj_angle)
 
-        # s_dot_s is 1 (unit vector), so the vector from the line origin to the projected point is:
-        p_n = v_dot_s * cos_theta
-        p_e = v_dot_s * sin_theta
+        # Compute distance as angle from arbitrary point on line
+        angle_error = np.arctan2(self.kp_course * line_distance, 1)
 
-        # Finally, converting it back into the world origin, we get the orthogonal projection of the
-        # line onto the origin:
-        proj_n = p_n + line_origin[0]
-        proj_e = p_e + line_origin[1]
-
-        # We want to control the (signed) distance between projection and local position down to zero:
-        proj_size = np.sqrt((proj_n - local_position[0]) ** 2 + (proj_e - local_position[1]) ** 2)
-        proj_angle = np.arctan2(proj_e - local_position[1], proj_n - local_position[0])
-        proj_sign = 1 if LateralAutoPilot.fmod(proj_angle - line_course) > 0 else -1
-
-        # Control the error (as an angle of an arbitrary large orbit) to zero
-        course_cmd = np.arctan(self.kp_course * proj_sign * proj_size)
+        # Control the error to zero
+        course_cmd = line_course - angle_error
 
         return course_cmd
 ```
 
 ```
 	# Gain parameters for the straight_line_guidance P controller
-	self.kp_course = 0.005
+	self.kp_course = -0.003
 ```
 
 ### Scenario #10: Orbit Following
@@ -369,6 +356,16 @@ This implementation is analogous to the official solution, but should be much si
 ![Orbit Following Scenario Success](images/scenario/scenario10_success.png)
 
 ### Scenario #11: Lateral/Directional Challenge
+
+![Lateral/Directional Challenge Scenario Intro](images/scenario/scenario11_intro.png)
+
+This scenario requires a navigation from gate to gate, changing the behavior of the plane (from straight line following to orbit) within each segment.
+
+It tests that counterclockwise rotation for orbit following is implemented correctly, as is following lines with a course other than 0 radians.
+
+As a final surprise, the ending gate is *not* at (100, -680) as indicated on the documentation, but instead at (-400, -680).  If the plane is provided with the default (0, 0) controls past this non-existing gate, the plane will turn to the sides and cause plenty of confusion, causing me to check almost every single other controller implementation.
+
+![Lateral/Directional Challenge Scenario Success](images/scenario/scenario11_success.png)
 
 ## Final Challenges
 

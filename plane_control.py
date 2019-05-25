@@ -230,7 +230,7 @@ class LateralAutoPilot:
         self.ki_yaw = 0.4
 
         # Gain parameters for the straight_line_guidance P controller
-        self.kp_course = 0.005
+        self.kp_course = -0.003
 
         # Gain parameters for the orbit_guidance P controller
         self.kp_orbit_guidance = 2.5
@@ -363,32 +363,19 @@ class LateralAutoPilot:
     """
     def straight_line_guidance(self, line_origin, line_course,
                                local_position):
-        # Compute the vector v from the line origin to the local position
-        v_n = local_position[0] - line_origin[0]
-        v_e = local_position[1] - line_origin[1]
 
-        # Compute the projection of v onto a unit vector with angle line_course
-        sin_theta = np.sin(line_course)
-        cos_theta = np.cos(line_course)
+        # Compute the distance between the local position and its projection on the line
+        v_n = line_origin[0] - local_position[0]
+        v_e = line_origin[1] - local_position[1]
 
-        v_dot_s = v_n * cos_theta + v_e * sin_theta
+        proj_angle = np.arctan2(v_e, v_n) - line_course
+        line_distance = np.sqrt(v_n**2 + v_e**2) * np.sin(proj_angle)
 
-        # s_dot_s is 1 (unit vector), so the vector from the line origin to the projected point is:
-        p_n = v_dot_s * cos_theta
-        p_e = v_dot_s * sin_theta
+        # Compute distance as angle from arbitrary point on line
+        angle_error = np.arctan2(self.kp_course * line_distance, 1)
 
-        # Finally, converting it back into the world origin, we get the orthogonal projection of the
-        # line onto the origin:
-        proj_n = p_n + line_origin[0]
-        proj_e = p_e + line_origin[1]
-
-        # We want to control the (signed) distance between projection and local position down to zero:
-        proj_size = np.sqrt((proj_n - local_position[0]) ** 2 + (proj_e - local_position[1]) ** 2)
-        proj_angle = np.arctan2(proj_e - local_position[1], proj_n - local_position[0])
-        proj_sign = 1 if LateralAutoPilot.fmod(proj_angle - line_course) > 0 else -1
-
-        # Control the error (as an angle of an arbitrary large orbit) to zero
-        course_cmd = np.arctan(self.kp_course * proj_sign * proj_size)
+        # Control the error to zero
+        course_cmd = line_course - angle_error
 
         return course_cmd
 
@@ -540,6 +527,16 @@ class LateralAutoPilot:
                                                       line_course=line_course,
                                                       local_position=local_position)
                 roll_ff = 0
+
+        if self.gate > 4:
+            # fly to the endpoint
+            line_origin = [-400, -680]
+            line_course = np.pi
+            yaw_cmd = self.straight_line_guidance(line_origin=line_origin,
+                                                  line_course=line_course,
+                                                  local_position=local_position)
+            roll_ff = 0
+
 
         return roll_ff, yaw_cmd
 
