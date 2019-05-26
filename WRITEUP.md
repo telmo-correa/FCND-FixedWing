@@ -425,4 +425,19 @@ I set to implement a simple solution, if not the most energy efficient:
 
 A flight planner is implemented as a class `FlyingCarPlanner`.  It does not maintain state; it is merely responsible for generating waypoints, checking whether a position reached a waypoint, and generating instructions for the plane control to execute.
 
-Work on this scenario is ongoing -- I am currently running into some issues performing vertical takeoff.
+Work on this scenario is ongoing -- I am currently running into some issues performing vertical takeoff; it seems that the drone does not respond to the higher level command functions below, which would require us to reimplement the VTOL controller.
+
+```
+    def cmd_vtol_position(self, north, east, altitude, heading):
+        """Command the local position and drone heading.
+    
+        Args:
+            north: local north in meters
+            east: local east in meters
+            altitude: altitude above ground in meters
+            heading: drone yaw in radians
+        """
+        
+    def takeoff(self, target_altitude):
+        """Command the drone to takeoff to the target_alt (in meters)"""
+```
